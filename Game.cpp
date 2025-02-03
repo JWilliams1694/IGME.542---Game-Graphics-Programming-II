@@ -22,6 +22,8 @@ void Game::Initialize()
 {
 	CreateRootSigAndPipelineState();
 	CreateGeometry();
+
+	camera = std::make_shared<Camera>(XMFLOAT3(8, 5, -20), Window::AspectRatio(), XM_PIDIV4);
 }
 
 // --------------------------------------------------------
@@ -41,37 +43,26 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::CreateGeometry()
 {
-	// Create some temporary variables to represent colors
-	// - Not necessary, just makes things more readable
-	XMFLOAT4 red = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 green = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	XMFLOAT4 blue = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	std::shared_ptr<Mesh> cube = std::make_shared<Mesh>("Cube", FixPath(AssetPath + L"Meshes/cube.obj").c_str());
+	std::shared_ptr<Mesh> sphere = std::make_shared<Mesh>("Sphere", FixPath(AssetPath + L"Meshes/sphere.obj").c_str());
+	std::shared_ptr<Mesh> helix = std::make_shared<Mesh>("Helix", FixPath(AssetPath + L"Meshes/helix.obj").c_str());
+	std::shared_ptr<Mesh> torus = std::make_shared<Mesh>("Torus", FixPath(AssetPath + L"Meshes/torus.obj").c_str());
+	std::shared_ptr<Mesh> cylinder = std::make_shared<Mesh>("Cylinder", FixPath(AssetPath + L"Meshes/cylinder.obj").c_str());
 
-	// Set up the vertices of the triangle we would like to draw
-	// - We're going to copy this array, exactly as it exists in CPU memory
-	//    over to a Direct3D-controlled data structure on the GPU (the vertex buffer)
-	// - Note: Since we don't have a camera or really any concept of
-	//    a "3d world" yet, we're simply describing positions within the
-	//    bounds of how the rasterizer sees our screen: [-1 to +1] on X and Y
-	// - This means (0,0) is at the very center of the screen.
-	// - These are known as "Normalized Device Coordinates" or "Homogeneous 
-	//    Screen Coords", which are ways to describe a position without
-	//    knowing the exact size (in pixels) of the image/window/etc.  
-	// - Long story short: Resizing the window also resizes the triangle,
-	//    since we're describing the triangle in terms of the window itself
-	Vertex vertices[] =
-	{
-		{ XMFLOAT3(+0.0f, +0.5f, +0.0f), red },
-		{ XMFLOAT3(+0.5f, -0.5f, +0.0f), blue },
-		{ XMFLOAT3(-0.5f, -0.5f, +0.0f), green },
-	};
+	// Create entities
+	std::shared_ptr<GameEntity> entityCube = std::make_shared<GameEntity>(cube);
+	entityCube->GetTransform()->SetPosition(3, 0, 0);
 
-	// Set up indices, which tell us which vertices to use and in which order
-	// - This is redundant for just 3 vertices, but will be more useful later
-	// - Indices are technically not required if the vertices are in the buffer 
-	//    in the correct order and each one will be used exactly once
-	// - But just to see how it's done...
-	unsigned int indices[] = { 0, 1, 2 };
+	std::shared_ptr<GameEntity> entityHelix = std::make_shared<GameEntity>(helix);
+	entityHelix->GetTransform()->SetPosition(0, 0, 0);
+
+	std::shared_ptr<GameEntity> entitySphere = std::make_shared<GameEntity>(sphere);
+	entitySphere->GetTransform()->SetPosition(-3, 0, 0);
+
+	// Add to list
+	entities.push_back(entityCube);
+	entities.push_back(entityHelix);
+	entities.push_back(entitySphere);
 
 
 	// Create the two buffers
@@ -93,6 +84,7 @@ void Game::CreateGeometry()
 // --------------------------------------------------------
 void Game::OnResize()
 {
+	camera->UpdateProjMatrix(Window::AspectRatio());
 	// Resize the viewport and scissor rectangle
 	{
 		// Set up the viewport so we render into the correct
@@ -123,6 +115,7 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
+	camera->Update(deltaTime);
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::KeyDown(VK_ESCAPE))
 		Window::Quit();
@@ -246,13 +239,30 @@ void Game::CreateRootSigAndPipelineState()
 	}
 	// Root Signature
 	{
-		// Describe and serialize the root signature
+		// Define a table of CBV's (constant buffer views)
+		D3D12_DESCRIPTOR_RANGE cbvTable = {};
+		cbvTable.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+		cbvTable.NumDescriptors = 1;
+		cbvTable.BaseShaderRegister = 0;
+		cbvTable.RegisterSpace = 0;
+		cbvTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+		// Define the root parameter
+		D3D12_ROOT_PARAMETER rootParam = {};
+		rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+		rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+		rootParam.DescriptorTable.NumDescriptorRanges = 1;
+		rootParam.DescriptorTable.pDescriptorRanges = &cbvTable;
+
+		// Describe the overall the root signature
 		D3D12_ROOT_SIGNATURE_DESC rootSig = {};
 		rootSig.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-		rootSig.NumParameters = 0;
-		rootSig.pParameters = 0;
+		rootSig.NumParameters = 1;
+		rootSig.pParameters = &rootParam;
 		rootSig.NumStaticSamplers = 0;
 		rootSig.pStaticSamplers = 0;
+
+
 		ID3DBlob* serializedRootSig = 0;
 		ID3DBlob* errors = 0;
 		D3D12SerializeRootSignature(
