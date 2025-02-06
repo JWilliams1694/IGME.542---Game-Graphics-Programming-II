@@ -21,7 +21,7 @@ using namespace DirectX;
 // --------------------------------------------------------
 void Game::Initialize()
 {
-	camera = std::make_shared<Camera>(XMFLOAT3(8, 5, -20), Window::AspectRatio(), XM_PIDIV4);
+	camera = std::make_shared<Camera>(XMFLOAT3(0, 0, -20), Window::AspectRatio(), XM_PIDIV4);
 	CreateRootSigAndPipelineState();
 	CreateGeometry();
 }
@@ -58,10 +58,14 @@ void Game::CreateGeometry()
 	entities.push_back(std::make_shared<GameEntity>(meshes[0]));
 	entities.push_back(std::make_shared<GameEntity>(meshes[1]));
 	entities.push_back(std::make_shared<GameEntity>(meshes[2]));
+	entities.push_back(std::make_shared<GameEntity>(meshes[3]));
+	entities.push_back(std::make_shared<GameEntity>(meshes[4]));
 
-	entities[0]->GetTransform()->SetPosition(3, 0, 0);
-	entities[1]->GetTransform()->SetPosition(0, 0, 0);
-	entities[2]->GetTransform()->SetPosition(-3, 0, 0);
+	entities[0]->GetTransform()->SetPosition(-6, 0, 0);
+	entities[1]->GetTransform()->SetPosition(-3, 0, 0);
+	entities[2]->GetTransform()->SetPosition(0, 0, 0);
+	entities[3]->GetTransform()->SetPosition(3, 0, 0);
+	entities[4]->GetTransform()->SetPosition(6, 0, 0);
 }
 
 
