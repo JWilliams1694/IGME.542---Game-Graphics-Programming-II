@@ -48,6 +48,7 @@ private:
 	D3D12_RECT scissorRect{};
 
 	std::shared_ptr<Camera> camera;
+	std::vector<std::shared_ptr<Mesh>> meshes;
 	std::vector<std::shared_ptr<GameEntity>> entities;
 };
 

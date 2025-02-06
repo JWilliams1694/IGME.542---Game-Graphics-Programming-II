@@ -4,6 +4,7 @@
 #include "Input.h"
 #include "PathHelpers.h"
 #include "Window.h"
+#include "BufferStructs.h"
 
 #include <DirectXMath.h>
 
@@ -20,10 +21,9 @@ using namespace DirectX;
 // --------------------------------------------------------
 void Game::Initialize()
 {
+	camera = std::make_shared<Camera>(XMFLOAT3(8, 5, -20), Window::AspectRatio(), XM_PIDIV4);
 	CreateRootSigAndPipelineState();
 	CreateGeometry();
-
-	camera = std::make_shared<Camera>(XMFLOAT3(8, 5, -20), Window::AspectRatio(), XM_PIDIV4);
 }
 
 // --------------------------------------------------------
@@ -43,38 +43,25 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::CreateGeometry()
 {
-	std::shared_ptr<Mesh> cube = std::make_shared<Mesh>("Cube", FixPath(AssetPath + L"Meshes/cube.obj").c_str());
-	std::shared_ptr<Mesh> sphere = std::make_shared<Mesh>("Sphere", FixPath(AssetPath + L"Meshes/sphere.obj").c_str());
-	std::shared_ptr<Mesh> helix = std::make_shared<Mesh>("Helix", FixPath(AssetPath + L"Meshes/helix.obj").c_str());
-	std::shared_ptr<Mesh> torus = std::make_shared<Mesh>("Torus", FixPath(AssetPath + L"Meshes/torus.obj").c_str());
-	std::shared_ptr<Mesh> cylinder = std::make_shared<Mesh>("Cylinder", FixPath(AssetPath + L"Meshes/cylinder.obj").c_str());
+	std::shared_ptr<Mesh> cubeMesh = std::make_shared<Mesh>("Cube", FixPath(L"../../Assets/Meshes/cube.obj").c_str());
+	std::shared_ptr<Mesh> sphereMesh = std::make_shared<Mesh>("Sphere", FixPath(L"../../Assets/Meshes/sphere.obj").c_str());
+	std::shared_ptr<Mesh> helixMesh = std::make_shared<Mesh>("Helix", FixPath(L"../../Assets/Meshes/helix.obj").c_str());
+	std::shared_ptr<Mesh> torusMesh = std::make_shared<Mesh>("Torus", FixPath(L"../../Assets/Meshes/torus.obj").c_str());
+	std::shared_ptr<Mesh> cylinderMesh = std::make_shared<Mesh>("Cylinder", FixPath(L"../../Assets/Meshes/cylinder.obj").c_str());
 
-	// Create entities
-	std::shared_ptr<GameEntity> entityCube = std::make_shared<GameEntity>(cube);
-	entityCube->GetTransform()->SetPosition(3, 0, 0);
+	meshes.push_back(cubeMesh);
+	meshes.push_back(sphereMesh);
+	meshes.push_back(helixMesh);
+	meshes.push_back(torusMesh);
+	meshes.push_back(cylinderMesh);
 
-	std::shared_ptr<GameEntity> entityHelix = std::make_shared<GameEntity>(helix);
-	entityHelix->GetTransform()->SetPosition(0, 0, 0);
+	entities.push_back(std::make_shared<GameEntity>(meshes[0]));
+	entities.push_back(std::make_shared<GameEntity>(meshes[1]));
+	entities.push_back(std::make_shared<GameEntity>(meshes[2]));
 
-	std::shared_ptr<GameEntity> entitySphere = std::make_shared<GameEntity>(sphere);
-	entitySphere->GetTransform()->SetPosition(-3, 0, 0);
-
-	// Add to list
-	entities.push_back(entityCube);
-	entities.push_back(entityHelix);
-	entities.push_back(entitySphere);
-
-
-	// Create the two buffers
-	vertexBuffer = Graphics::CreateStaticBuffer(sizeof(Vertex), ARRAYSIZE(vertices), vertices);
-	indexBuffer = Graphics::CreateStaticBuffer(sizeof(unsigned int), ARRAYSIZE(indices), indices);
-	// Set up the views
-	vbView.StrideInBytes = sizeof(Vertex);
-	vbView.SizeInBytes = sizeof(Vertex) * ARRAYSIZE(vertices);
-	vbView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
-	ibView.Format = DXGI_FORMAT_R32_UINT;
-	ibView.SizeInBytes = sizeof(unsigned int) * ARRAYSIZE(indices);
-	ibView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
+	entities[0]->GetTransform()->SetPosition(3, 0, 0);
+	entities[1]->GetTransform()->SetPosition(0, 0, 0);
+	entities[2]->GetTransform()->SetPosition(-3, 0, 0);
 }
 
 
@@ -84,7 +71,11 @@ void Game::CreateGeometry()
 // --------------------------------------------------------
 void Game::OnResize()
 {
-	camera->UpdateProjMatrix(Window::AspectRatio());
+	if (camera)
+	{
+		camera->UpdateProjMatrix(Window::AspectRatio());
+	}
+
 	// Resize the viewport and scissor rectangle
 	{
 		// Set up the viewport so we render into the correct
@@ -115,6 +106,10 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
+	for (auto& entity : entities)
+	{
+		entity->GetTransform()->Rotate(0, deltaTime, 0);
+	}
 	camera->Update(deltaTime);
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::KeyDown(VK_ESCAPE))
@@ -162,16 +157,42 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::CommandList->SetPipelineState(pipelineState.Get());
 		// Root sig (must happen before root descriptor table)
 		Graphics::CommandList->SetGraphicsRootSignature(rootSignature.Get());
+		Graphics::CommandList->SetDescriptorHeaps(1, Graphics::CBVSRVDescriptorHeap.GetAddressOf());
+
 		// Set up other commands for rendering
 		Graphics::CommandList->OMSetRenderTargets(
 			1, &Graphics::RTVHandles[Graphics::SwapChainIndex()], true, &Graphics::DSVHandle);
 		Graphics::CommandList->RSSetViewports(1, &viewport);
 		Graphics::CommandList->RSSetScissorRects(1, &scissorRect);
-		Graphics::CommandList->IASetVertexBuffers(0, 1, &vbView);
-		Graphics::CommandList->IASetIndexBuffer(&ibView);
 		Graphics::CommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		// Draw
-		Graphics::CommandList->DrawIndexedInstanced(3, 1, 0, 0, 0);
+
+		for (auto& entity : entities)
+		{
+			//Fill out a VertexShaderExternalData struct with the entity’s world matrix and the camera’s matrices
+			VertexShaderExternalData vsData = {};
+			vsData.world = entity->GetTransform()->GetWorldMatrix();
+			vsData.view = camera->GetViewMatrix();
+			vsData.projection = camera->GetProjMatrix();
+
+			//Use FillNextConstantBufferAndGetGPUDescriptorHandle() to copy the above struct to the GPU
+			// and get back the corresponding handle to the constant buffer view.
+			D3D12_GPU_DESCRIPTOR_HANDLE cbHandle = Graphics::FillNextConstantBufferAndGetGPUDescriptorHandle((void*)(&vsData), sizeof(VertexShaderExternalData));
+
+			//Use commandList->SetGraphicsRootDescriptorTable(0, handle) to set the handle from the previous line.
+			Graphics::CommandList->SetGraphicsRootDescriptorTable(0, cbHandle);
+
+			//Grab the vertex buffer view and index buffer view from this entity’s mesh
+			std::shared_ptr<Mesh> mesh = entity->GetMesh();
+			D3D12_VERTEX_BUFFER_VIEW vbv = mesh->GetVertexBuffer();
+			D3D12_INDEX_BUFFER_VIEW  ibv = mesh->GetIndexBuffer();
+
+			//Set them using IASetVertexBuffers() and IASetIndexBuffer()
+			Graphics::CommandList->IASetVertexBuffers(0, 1, &vbv);
+			Graphics::CommandList->IASetIndexBuffer(&ibv);
+
+			//Call DrawIndexedInstanced() using the index count of this entity’s mesh
+			Graphics::CommandList->DrawIndexedInstanced((UINT)mesh->GetIndexCount(), 1, 0, 0, 0);
+		}
 	}
 	// Present
 	{

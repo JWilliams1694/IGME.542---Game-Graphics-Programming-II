@@ -596,7 +596,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE Graphics::FillNextConstantBufferAndGetGPUDescriptorH
 	if (cbUploadHeapOffsetInBytes + reservationSize >= cbUploadHeapSizeInBytes)
 		cbUploadHeapOffsetInBytes = 0;
 	// Where in the upload heap will this data go?
-	D3D12_GPU_VIRTUAL_ADDRESS virtualGPUAddress = cbUploadHeap->GetGPUVirtualAddress() + cbUploadHeapOffsetInBytes;
+	D3D12_GPU_VIRTUAL_ADDRESS virtualGPUAddress = CBUploadHeap->GetGPUVirtualAddress() + cbUploadHeapOffsetInBytes;
 	// === Copy data to the upload heap ===
 	{
 		// Calculate the actual upload address (which we got from mapping the buffer)
@@ -614,8 +614,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE Graphics::FillNextConstantBufferAndGetGPUDescriptorH
 	// Create a CBV for this section of the heap
 	{
 		// Calculate the CPU and GPU side handles for this descriptor
-		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = cbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = cbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = CBVSRVDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = CBVSRVDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 		// Offset each by based on how many descriptors we've used
 		// Note: cbvDescriptorOffset is a COUNT of descriptors, not bytes so we must calculate the size
 		cpuHandle.ptr += (SIZE_T)cbvDescriptorOffset * cbvSrvDescriptorHeapIncrementSize;
@@ -625,11 +625,11 @@ D3D12_GPU_DESCRIPTOR_HANDLE Graphics::FillNextConstantBufferAndGetGPUDescriptorH
 		cbvDesc.BufferLocation = virtualGPUAddress;
 		cbvDesc.SizeInBytes = (UINT)reservationSize;
 		// Create the CBV, which is a lightweight operation in DX12
-		device->CreateConstantBufferView(&cbvDesc, cpuHandle);
+		Device->CreateConstantBufferView(&cbvDesc, cpuHandle);
 		// Increment the offset and loop back to the beginning if necessary
 		// which allows us to treat the descriptor heap as a ring buffer
 		cbvDescriptorOffset++;
-		if (cbvDescriptorOffset >= maxConstantBuffers)
+		if (cbvDescriptorOffset >= MaxConstantBuffers)
 			cbvDescriptorOffset = 0;
 		// Now that the CBV is ready, we return the GPU handle to it
 		// so it can be set as part of the root signature during drawing
