@@ -36,7 +36,8 @@ private:
 	DirectX::XMFLOAT2 uvOffset;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState;
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSRVsBySlot[128]; //128 suggested
-	int highestSRVSlot;
+	int highestSRVSlot=0;
 	D3D12_GPU_DESCRIPTOR_HANDLE finalGPUHandleForSRVs;
+	bool finalized = false;
 };
 
