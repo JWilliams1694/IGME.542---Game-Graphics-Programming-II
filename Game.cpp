@@ -43,11 +43,53 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::CreateGeometry()
 {
+	//copy pasted from demo to save time 
+	// Load textures
+	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneAlbedo = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/cobblestone_albedo.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneNormals = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/cobblestone_normals.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneRoughness = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/cobblestone_roughness.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneMetal = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/cobblestone_metal.png").c_str());
+
+	D3D12_CPU_DESCRIPTOR_HANDLE bronzeAlbedo = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/bronze_albedo.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE bronzeNormals = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/bronze_normals.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE bronzeRoughness = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/bronze_roughness.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE bronzeMetal = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/bronze_metal.png").c_str());
+
+	D3D12_CPU_DESCRIPTOR_HANDLE scratchedAlbedo = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/scratched_albedo.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE scratchedNormals = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/scratched_normals.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE scratchedRoughness = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/scratched_roughness.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE scratchedMetal = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/scratched_metal.png").c_str());
+
+
 	std::shared_ptr<Mesh> cubeMesh = std::make_shared<Mesh>("Cube", FixPath(L"../../Assets/Meshes/cube.obj").c_str());
 	std::shared_ptr<Mesh> sphereMesh = std::make_shared<Mesh>("Sphere", FixPath(L"../../Assets/Meshes/sphere.obj").c_str());
 	std::shared_ptr<Mesh> helixMesh = std::make_shared<Mesh>("Helix", FixPath(L"../../Assets/Meshes/helix.obj").c_str());
 	std::shared_ptr<Mesh> torusMesh = std::make_shared<Mesh>("Torus", FixPath(L"../../Assets/Meshes/torus.obj").c_str());
 	std::shared_ptr<Mesh> cylinderMesh = std::make_shared<Mesh>("Cylinder", FixPath(L"../../Assets/Meshes/cylinder.obj").c_str());
+
+	// Create materials
+	//taken from demo to save time
+	std::shared_ptr<Material> cobbleMat = std::make_shared<Material>(pipelineState, XMFLOAT3(1, 1, 1));
+	cobbleMat->AddTexture(cobblestoneAlbedo, 0);
+	cobbleMat->AddTexture(cobblestoneNormals, 1);
+	cobbleMat->AddTexture(cobblestoneRoughness, 2);
+	cobbleMat->AddTexture(cobblestoneMetal, 3);
+	cobbleMat->FinalizeMaterial();
+
+	std::shared_ptr<Material> bronzeMat = std::make_shared<Material>(pipelineState, XMFLOAT3(1, 1, 1));
+	bronzeMat->AddTexture(bronzeAlbedo, 0);
+	bronzeMat->AddTexture(bronzeNormals, 1);
+	bronzeMat->AddTexture(bronzeRoughness, 2);
+	bronzeMat->AddTexture(bronzeMetal, 3);
+	bronzeMat->FinalizeMaterial();
+
+	std::shared_ptr<Material> scratchedMat = std::make_shared<Material>(pipelineState, XMFLOAT3(1, 1, 1));
+	scratchedMat->AddTexture(scratchedAlbedo, 0);
+	scratchedMat->AddTexture(scratchedNormals, 1);
+	scratchedMat->AddTexture(scratchedRoughness, 2);
+	scratchedMat->AddTexture(scratchedMetal, 3);
+	scratchedMat->FinalizeMaterial();
+
 
 	meshes.push_back(cubeMesh);
 	meshes.push_back(sphereMesh);
@@ -55,11 +97,11 @@ void Game::CreateGeometry()
 	meshes.push_back(torusMesh);
 	meshes.push_back(cylinderMesh);
 
-	entities.push_back(std::make_shared<GameEntity>(meshes[0]));
-	entities.push_back(std::make_shared<GameEntity>(meshes[1]));
-	entities.push_back(std::make_shared<GameEntity>(meshes[2]));
-	entities.push_back(std::make_shared<GameEntity>(meshes[3]));
-	entities.push_back(std::make_shared<GameEntity>(meshes[4]));
+	entities.push_back(std::make_shared<GameEntity>(meshes[0], cobbleMat));
+	entities.push_back(std::make_shared<GameEntity>(meshes[1], bronzeMat));
+	entities.push_back(std::make_shared<GameEntity>(meshes[2], scratchedMat));
+	entities.push_back(std::make_shared<GameEntity>(meshes[3], cobbleMat));
+	entities.push_back(std::make_shared<GameEntity>(meshes[4], bronzeMat));
 
 	entities[0]->GetTransform()->SetPosition(-6, 0, 0);
 	entities[1]->GetTransform()->SetPosition(-3, 0, 0);

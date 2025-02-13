@@ -1,7 +1,7 @@
 #include "Material.h"
 #include "Graphics.h"
 
-Material::Material(DirectX::XMFLOAT3 tint, DirectX::XMFLOAT2 uvScale, DirectX::XMFLOAT2 uvOffset, Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState) :
+Material::Material(Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState,DirectX::XMFLOAT3 tint, DirectX::XMFLOAT2 uvScale, DirectX::XMFLOAT2 uvOffset) :
 	tint(tint),
 	uvScale(uvScale),
 	uvOffset(uvOffset),

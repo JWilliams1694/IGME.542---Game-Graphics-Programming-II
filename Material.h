@@ -9,10 +9,9 @@
 class Material
 {
 public:
-	Material(DirectX::XMFLOAT3 tint,
-		DirectX::XMFLOAT2 uvScale = DirectX::XMFLOAT2(1, 1),
-		DirectX::XMFLOAT2 uvOffset = DirectX::XMFLOAT2(0, 0),
-		Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState);
+	Material(Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState, DirectX::XMFLOAT3 tint,
+			 DirectX::XMFLOAT2 uvScale = DirectX::XMFLOAT2(1, 1),
+			 DirectX::XMFLOAT2 uvOffset = DirectX::XMFLOAT2(0, 0));
 
 	//setters
 	void SetTint(DirectX::XMFLOAT3 tint);
@@ -36,7 +35,7 @@ private:
 	DirectX::XMFLOAT2 uvOffset;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState;
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSRVsBySlot[128]; //128 suggested
-	int highestSRVSlot=0;
+	int highestSRVSlot = 0;
 	D3D12_GPU_DESCRIPTOR_HANDLE finalGPUHandleForSRVs;
 	bool finalized = false;
 };
