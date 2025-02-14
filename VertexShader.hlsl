@@ -1,8 +1,9 @@
 cbuffer ExternalData : register(b0)
 {
-	matrix world;
-	matrix view;
-	matrix projection;
+    matrix world;
+    matrix worldInvTranspose;
+    matrix view;
+    matrix projection;
 }
 // Struct representing a single vertex worth of data
 // - This should match the vertex definition in our C++ code
@@ -16,10 +17,10 @@ struct VertexShaderInput
 	//  |   Name          Semantic
 	//  |    |                |
 	//  v    v                v
-	float3 localPosition : POSITION;     // XYZ position
-	float2 uv : TEXCOORD;
-	float3 normal : NORMAL;
-	float3 tangent : TANGENT;
+    float3 localPosition : POSITION; // XYZ position
+    float2 uv : TEXCOORD;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
 };
 
 // Struct representing the data we're sending down the pipeline
@@ -34,7 +35,11 @@ struct VertexToPixel
 	//  |   Name          Semantic
 	//  |    |                |
 	//  v    v                v
-	float4 screenPosition : SV_POSITION;	// XYZW position (System Value Position)
+    float4 screenPosition : SV_POSITION; // XYZW position (System Value Position)
+    float2 uv : TEXCOORD;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float3 worldPosition : POSITION;
 };
 
 // --------------------------------------------------------
@@ -47,7 +52,7 @@ struct VertexToPixel
 VertexToPixel main(VertexShaderInput input)
 {
 	// Set up output struct
-	VertexToPixel output;
+    VertexToPixel output;
 
 	// Here we're essentially passing the input position directly through to the next
 	// stage (rasterizer), though it needs to be a 4-component vector now.  
@@ -60,8 +65,12 @@ VertexToPixel main(VertexShaderInput input)
     matrix wvp = mul(projection, mul(view, world));
     output.screenPosition = mul(wvp, float4(input.localPosition, 1.0f));
 
+    output.normal = normalize(mul((float3x3) worldInvTranspose, input.normal));
+    output.tangent = normalize(mul((float3x3) world, input.tangent));
+    output.worldPosition = mul(world, float4(input.localPosition, 1.0f)).xyz;
+    output.uv = input.uv;
 
 	// Whatever we return will make its way through the pipeline to the
 	// next programmable stage we're using (the pixel shader for now)
-	return output;
+    return output;
 }

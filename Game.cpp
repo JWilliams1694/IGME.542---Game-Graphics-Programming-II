@@ -5,6 +5,7 @@
 #include "PathHelpers.h"
 #include "Window.h"
 #include "BufferStructs.h"
+#include <stdlib.h>
 
 #include <DirectXMath.h>
 
@@ -15,12 +16,18 @@
 // For the DirectX Math library
 using namespace DirectX;
 
+//random method from demo for convenience
+#define Random(min, max) (float)rand() / RAND_MAX * (max - min) + min
+
+
 // --------------------------------------------------------
 // Called once per program, after the window and graphics API
 // are initialized but before the game loop begins
 // --------------------------------------------------------
 void Game::Initialize()
 {
+	lightCount = 32;
+	CreateLights();
 	camera = std::make_shared<Camera>(XMFLOAT3(0, 0, -20), Window::AspectRatio(), XM_PIDIV4);
 	CreateRootSigAndPipelineState();
 	CreateGeometry();
@@ -45,20 +52,20 @@ void Game::CreateGeometry()
 {
 	//copy pasted from demo to save time 
 	// Load textures
-	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneAlbedo = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/cobblestone_albedo.png").c_str());
-	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneNormals = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/cobblestone_normals.png").c_str());
-	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneRoughness = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/cobblestone_roughness.png").c_str());
-	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneMetal = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/cobblestone_metal.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneAlbedo = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/cobblestone_albedo.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneNormals = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/cobblestone_normals.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneRoughness = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/cobblestone_roughness.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneMetal = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/cobblestone_metal.png").c_str());
 
-	D3D12_CPU_DESCRIPTOR_HANDLE bronzeAlbedo = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/bronze_albedo.png").c_str());
-	D3D12_CPU_DESCRIPTOR_HANDLE bronzeNormals = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/bronze_normals.png").c_str());
-	D3D12_CPU_DESCRIPTOR_HANDLE bronzeRoughness = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/bronze_roughness.png").c_str());
-	D3D12_CPU_DESCRIPTOR_HANDLE bronzeMetal = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/bronze_metal.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE bronzeAlbedo = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/bronze_albedo.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE bronzeNormals = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/bronze_normals.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE bronzeRoughness = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/bronze_roughness.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE bronzeMetal = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/bronze_metal.png").c_str());
 
-	D3D12_CPU_DESCRIPTOR_HANDLE scratchedAlbedo = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/scratched_albedo.png").c_str());
-	D3D12_CPU_DESCRIPTOR_HANDLE scratchedNormals = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/scratched_normals.png").c_str());
-	D3D12_CPU_DESCRIPTOR_HANDLE scratchedRoughness = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/scratched_roughness.png").c_str());
-	D3D12_CPU_DESCRIPTOR_HANDLE scratchedMetal = Graphics::LoadTexture(FixPath(L"../../Textures/PBR/scratched_metal.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE scratchedAlbedo = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/scratched_albedo.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE scratchedNormals = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/scratched_normals.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE scratchedRoughness = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/scratched_roughness.png").c_str());
+	D3D12_CPU_DESCRIPTOR_HANDLE scratchedMetal = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/scratched_metal.png").c_str());
 
 
 	std::shared_ptr<Mesh> cubeMesh = std::make_shared<Mesh>("Cube", FixPath(L"../../Assets/Meshes/cube.obj").c_str());
@@ -108,6 +115,61 @@ void Game::CreateGeometry()
 	entities[2]->GetTransform()->SetPosition(0, 0, 0);
 	entities[3]->GetTransform()->SetPosition(3, 0, 0);
 	entities[4]->GetTransform()->SetPosition(6, 0, 0);
+}
+
+void Game::CreateLights()
+{
+	//all of the lights
+	Light dirLight1 = {};
+	dirLight1.Color = XMFLOAT3(1, 1, 1);
+	dirLight1.Type = LIGHT_TYPE_DIRECTIONAL;
+	dirLight1.Intensity = 2.5f;
+	dirLight1.Direction = XMFLOAT3(0, -3, -3);
+
+	Light dirLight2 = {};
+	dirLight2.Color = XMFLOAT3(1, 1, 1);
+	dirLight2.Type = LIGHT_TYPE_DIRECTIONAL;
+	dirLight2.Intensity = 1.0f;
+	dirLight2.Direction = XMFLOAT3(-1, 0, 0);
+
+	Light dirLight3 = {};
+	dirLight3.Color = XMFLOAT3(1, 1, 1);
+	dirLight3.Type = LIGHT_TYPE_DIRECTIONAL;
+	dirLight3.Intensity = 1.0f;
+	dirLight3.Direction = XMFLOAT3(0, -5, 1);
+
+	Light pointLight1 = {};
+	pointLight1.Color = XMFLOAT3(1, 1, 1);
+	pointLight1.Type = LIGHT_TYPE_POINT;
+	pointLight1.Intensity = 2.0f;
+	pointLight1.Position = XMFLOAT3(-1.5f, 0, 0);
+	pointLight1.Range = 15.0f;
+
+	Light pointLight2 = {};
+	pointLight2.Color = XMFLOAT3(1, 1, 1);
+	pointLight2.Type = LIGHT_TYPE_POINT;
+	pointLight2.Intensity = 2.0f;
+	pointLight2.Position = XMFLOAT3(20, 0, 0);
+	pointLight2.Range = 15.0f;
+
+	// Add all of the lights to the list
+	lights.push_back(dirLight1);
+	lights.push_back(dirLight2);
+	lights.push_back(dirLight3);
+	lights.push_back(pointLight1);
+	lights.push_back(pointLight2);
+
+	while (lights.size() < MAX_LIGHTS)
+	{
+		Light pointLight1 = {};
+		pointLight1.Color = XMFLOAT3(Random(0, 1), Random(0, 1), Random(0, 1));
+		pointLight1.Type = LIGHT_TYPE_POINT;
+		pointLight1.Intensity = 2.0f;
+		pointLight1.Position = XMFLOAT3(Random(-15.0f, 15.0f), Random(-2.0f, 5.0f), Random(-15.0f, 15.0f));
+		pointLight1.Range = 15.0f;
+
+		lights.push_back(pointLight1);
+	}
 }
 
 
@@ -214,6 +276,14 @@ void Game::Draw(float deltaTime, float totalTime)
 
 		for (auto& entity : entities)
 		{
+			// grab the current entity’s material
+			std::shared_ptr<Material> mat = entity->GetMaterial();
+			//set the pipeline state this material intends to use
+			Graphics::CommandList->SetPipelineState(mat->GetPipelineState().Get());
+			// Set the SRV descriptor handle for this material's textures
+			// Note: This assumes that descriptor table 2 is for textures (as per our root sig)
+			Graphics::CommandList->SetGraphicsRootDescriptorTable(2, mat->GetFinalGPUHandleForSRVs());
+
 			//Fill out a VertexShaderExternalData struct with the entity’s world matrix and the camera’s matrices
 			VertexShaderExternalData vsData = {};
 			vsData.world = entity->GetTransform()->GetWorldMatrix();
@@ -226,6 +296,27 @@ void Game::Draw(float deltaTime, float totalTime)
 
 			//Use commandList->SetGraphicsRootDescriptorTable(0, handle) to set the handle from the previous line.
 			Graphics::CommandList->SetGraphicsRootDescriptorTable(0, cbHandle);
+
+			// Pixel shader data and cbuffer setup
+			{
+				PixelShaderExternalData psData = {};
+				psData.uvScale = mat->GetUVScale();
+				psData.uvOffset = mat->GetUVOffset();
+				psData.cameraPosition = camera->GetTransform()->GetPosition();
+				psData.lightCount = lightCount;
+				memcpy(psData.lights, &lights[0], sizeof(Light) * MAX_LIGHTS);
+				// Send this to a chunk of the constant buffer heap
+				// and grab the GPU handle for it so we can set it for this draw
+				D3D12_GPU_DESCRIPTOR_HANDLE cbHandlePS =
+					Graphics::FillNextConstantBufferAndGetGPUDescriptorHandle(
+						(void*)(&psData), sizeof(PixelShaderExternalData));
+				// Set this constant buffer handle
+				// Note: This assumes that descriptor table 1 is the
+				// place to put this particular descriptor. This
+				// is based on how we set up our root signature.
+				Graphics::CommandList->SetGraphicsRootDescriptorTable(
+					1, cbHandlePS);
+			}
 
 			//Grab the vertex buffer view and index buffer view from this entity’s mesh
 			std::shared_ptr<Mesh> mesh = entity->GetMesh();

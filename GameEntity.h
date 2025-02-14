@@ -12,6 +12,7 @@ public:
 
 	std::shared_ptr<Mesh> GetMesh();
 	std::shared_ptr<Transform> GetTransform();
+	std::shared_ptr<Material> GetMaterial();
 
 	void SetMesh(std::shared_ptr<Mesh> mesh);
 	void SetTransform(std::shared_ptr<Transform> transform);

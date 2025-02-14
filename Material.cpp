@@ -9,6 +9,8 @@ Material::Material(Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState,Dir
 {
 	//initialize data
 	finalGPUHandleForSRVs = {};
+	//zero out the texture SRVs
+	ZeroMemory(textureSRVsBySlot, sizeof(D3D12_CPU_DESCRIPTOR_HANDLE) * 128);
 }
 
 void Material::SetTint(DirectX::XMFLOAT3 tint)
@@ -53,11 +55,19 @@ Microsoft::WRL::ComPtr<ID3D12PipelineState> Material::GetPipelineState()
 
 void Material::AddTexture(D3D12_CPU_DESCRIPTOR_HANDLE srv, int slot)
 {
-	if (!finalized)
-	{
-		textureSRVsBySlot[slot] = srv;
-		highestSRVSlot = slot;
-	}
+	if (finalized || slot < 0 || slot >= 128)
+		return;
+
+	// Save and check if this was the highest slot
+	textureSRVsBySlot[slot] = srv;
+	highestSRVSlot = max(highestSRVSlot, slot);
+
+
+	//if (!finalized)
+	//{
+	//	textureSRVsBySlot[slot] = srv;
+	//	highestSRVSlot = slot;
+	//}
 }
 
 void Material::FinalizeMaterial()
