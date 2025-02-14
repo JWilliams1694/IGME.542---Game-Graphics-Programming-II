@@ -138,28 +138,28 @@ void Game::CreateLights()
 	dirLight3.Intensity = 1.0f;
 	dirLight3.Direction = XMFLOAT3(0, -5, 1);
 
-	Light pointLight1 = {};
-	pointLight1.Color = XMFLOAT3(1, 1, 1);
-	pointLight1.Type = LIGHT_TYPE_POINT;
-	pointLight1.Intensity = 2.0f;
-	pointLight1.Position = XMFLOAT3(-1.5f, 0, 0);
-	pointLight1.Range = 15.0f;
+	//Light pointLight1 = {};
+	//pointLight1.Color = XMFLOAT3(1, 1, 1);
+	//pointLight1.Type = LIGHT_TYPE_POINT;
+	//pointLight1.Intensity = 2.0f;
+	//pointLight1.Position = XMFLOAT3(-1.5f, 0, 0);
+	//pointLight1.Range = 15.0f;
 
-	Light pointLight2 = {};
-	pointLight2.Color = XMFLOAT3(1, 1, 1);
-	pointLight2.Type = LIGHT_TYPE_POINT;
-	pointLight2.Intensity = 2.0f;
-	pointLight2.Position = XMFLOAT3(20, 0, 0);
-	pointLight2.Range = 15.0f;
+	//Light pointLight2 = {};
+	//pointLight2.Color = XMFLOAT3(1, 1, 1);
+	//pointLight2.Type = LIGHT_TYPE_POINT;
+	//pointLight2.Intensity = 2.0f;
+	//pointLight2.Position = XMFLOAT3(20, 0, 0);
+	//pointLight2.Range = 15.0f;
 
 	// Add all of the lights to the list
 	lights.push_back(dirLight1);
 	lights.push_back(dirLight2);
 	lights.push_back(dirLight3);
-	lights.push_back(pointLight1);
-	lights.push_back(pointLight2);
+	//lights.push_back(pointLight1);
+	//lights.push_back(pointLight2);
 
-	while (lights.size() < MAX_LIGHTS)
+	while (lights.size() < lightCount&&lights.size()<MAX_LIGHTS)
 	{
 		Light pointLight1 = {};
 		pointLight1.Color = XMFLOAT3(Random(0, 1), Random(0, 1), Random(0, 1));
