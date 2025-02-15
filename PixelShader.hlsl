@@ -77,8 +77,8 @@ float4 main(VertexToPixel input) : SV_TARGET
     
     for (int i = 0; i < lightCount; i++)
     {
-        Light light = lights[i];
-        light.Direction = normalize(light.Direction);
+        //Light light = lights[i];
+        //light.Direction = normalize(light.Direction);
         
         switch (lights[i].Type)
         {
@@ -90,7 +90,12 @@ float4 main(VertexToPixel input) : SV_TARGET
                 break;
             case LIGHT_TYPE_SPOT:
                 break;
+            default:
+                finalColor = float3(0, 1, 0);
+                break;
         }
     }
+    //return float4(surfaceColor.xyz, 1);
     return float4(pow(finalColor, 1.0f / 2.2f), 1);
+
 }
