@@ -159,17 +159,23 @@ void Game::CreateLights()
 	lights.push_back(pointLight1);
 	lights.push_back(pointLight2);
 
-	//while (lights.size() < lightCount && lights.size() < MAX_LIGHTS)
-	//{
-	//	Light pointLight1 = {};
-	//	pointLight1.Color = XMFLOAT3(Random(0, 1), Random(0, 1), Random(0, 1));
-	//	pointLight1.Type = LIGHT_TYPE_POINT;
-	//	pointLight1.Intensity = 2.0f;
-	//	pointLight1.Position = XMFLOAT3(Random(-15.0f, 15.0f), Random(-2.0f, 5.0f), Random(-15.0f, 15.0f));
-	//	pointLight1.Range = 15.0f;
+	while (lights.size() < MAX_LIGHTS)
+	{
+		Light point = {};
+		point.Color = XMFLOAT3(Random(0, 1), Random(0, 1), Random(0, 1));
+		point.Type = LIGHT_TYPE_POINT;
+		point.Intensity = Random(0.1f, 5.0f);
+		point.Position = XMFLOAT3(Random(-15.0f, 15.0f), Random(-2.0f, 5.0f), Random(-15.0f, 15.0f));
+		point.Range = Random(3.0f, 15.0f);
 
-	//	lights.push_back(pointLight1);
-	//}
+		lights.push_back(point);
+	}
+	lights.resize(MAX_LIGHTS);
+
+	for (int i = 0; i < lights.size(); i++)
+	{
+		printf("Light %d Type: %d\n", i, lights[i].Type);
+	}
 }
 
 
