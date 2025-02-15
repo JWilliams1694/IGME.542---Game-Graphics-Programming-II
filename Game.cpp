@@ -156,8 +156,8 @@ void Game::CreateLights()
 	lights.push_back(dirLight1);
 	lights.push_back(dirLight2);
 	lights.push_back(dirLight3);
-	lights.push_back(pointLight1);
-	lights.push_back(pointLight2);
+	//lights.push_back(pointLight1);
+	//lights.push_back(pointLight2);
 
 	while (lights.size() < MAX_LIGHTS)
 	{
@@ -171,11 +171,6 @@ void Game::CreateLights()
 		lights.push_back(point);
 	}
 	lights.resize(MAX_LIGHTS);
-
-	for (int i = 0; i < lights.size(); i++)
-	{
-		printf("Light %d Type: %d\n", i, lights[i].Type);
-	}
 }
 
 
@@ -293,6 +288,7 @@ void Game::Draw(float deltaTime, float totalTime)
 			//Fill out a VertexShaderExternalData struct with the entity’s world matrix and the camera’s matrices
 			VertexShaderExternalData vsData = {};
 			vsData.world = entity->GetTransform()->GetWorldMatrix();
+			vsData.worldInvTranspose = entity->GetTransform()->GetWorldInverseTransposeMatrix();
 			vsData.view = camera->GetViewMatrix();
 			vsData.projection = camera->GetProjMatrix();
 

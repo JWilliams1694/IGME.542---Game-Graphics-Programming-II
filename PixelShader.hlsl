@@ -43,7 +43,6 @@ SamplerState BasicSampler : register(s0);
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
 {
-
     input.normal = normalize(input.normal);
     input.tangent = normalize(input.tangent);
     input.uv = input.uv * uvScale + uvOffset;
@@ -74,45 +73,21 @@ float4 main(VertexToPixel input) : SV_TARGET
     float3 specularColor = lerp(F0_NON_METAL, surfaceColor.rgb, metalness);
   
     float3 finalColor = 0;
-            float3 debugColor = float3(0, 0, 0);
     for (int i = 0; i < lightCount; i++)
-    {
-        int lightType = lights[i].Type;
-
-        if (lightType == LIGHT_TYPE_DIRECTIONAL)
-            debugColor += float3(1, 0, 0); // Red (Directional)
-        else if (lightType == LIGHT_TYPE_POINT)
-            debugColor += float3(0, 1, 0); // Green (Point)
-        else if (lightType == LIGHT_TYPE_SPOT)
-            debugColor += float3(0, 0, 1); // Blue (Spot)
-        else
-            debugColor += float3(1, 1, 0); // Yellow (Unexpected Type)
-
-
-    //    Light light = lights[i];
-    //    light.Direction = normalize(light.Direction);
-    //    
-    //    int lightType = int(lights[i].Type);
-    //    switch (lightType)
-    //    {
-    //        case LIGHT_TYPE_DIRECTIONAL:
-    //            finalColor += DirLightPBR(lights[i], input.normal, input.worldPosition, cameraPosition, roughness, metalness, surfaceColor, specularColor);
-    //            break;
-    //        case LIGHT_TYPE_POINT:
-    //            finalColor += PointLightPBR(lights[i], input.normal, input.worldPosition, cameraPosition, roughness, metalness, surfaceColor, specularColor);
-    //            break;
-    //        case LIGHT_TYPE_SPOT:
-    //            break;
-    //        default:
-    //            return float4(lights[i].Type / 2.0, 0, 0, 1); // Red should appear for Type = 2
-    //
-    //            break;
-    //    }
-    //}
-    
-    //return float4(pow(finalColor, 1.0f / 2.2f), 1);
+    {     
+        switch (lights[i].Type)
+        {
+            case LIGHT_TYPE_DIRECTIONAL:
+                finalColor += DirLightPBR(lights[i], input.normal, input.worldPosition, cameraPosition, roughness, metalness, surfaceColor, specularColor);
+                break;
+            case LIGHT_TYPE_POINT:
+                finalColor += PointLightPBR(lights[i], input.normal, input.worldPosition, cameraPosition, roughness, metalness, surfaceColor, specularColor);
+                break;
+            case LIGHT_TYPE_SPOT:
+                break;
+        }
     }
-    //return float4(surfaceColor.xyz, 1);
-    return float4(debugColor, 1);
-    //return float4(lightCount / 10.0f, 0, 0, 1);
+    
+    //
+    return float4(pow(finalColor, 1.0f / 2.2f), 1);
 }
