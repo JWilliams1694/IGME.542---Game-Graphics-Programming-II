@@ -111,6 +111,12 @@ private:
         return vec3(random_double() - 0.5, random_double() - 0.5, 0);
     }
 
+    vec3 sample_disk(double radius) const
+    {
+        // Returns a random point in the unit (radius 0.5) disk centered at the origin.
+        return radius * random_in_unit_disk();
+    }
+
     point3 defocus_disk_sample() const
     {
         // Returns a random point in the camera defocus disk.
