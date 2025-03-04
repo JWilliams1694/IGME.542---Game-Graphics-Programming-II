@@ -685,7 +685,7 @@ void RayTracing::CreateTopLevelAccelerationStructureForScene()
 	// All done - execute, wait and reset command list
 	Graphics::CloseAndExecuteCommandList();
 	Graphics::WaitForGPU();
-	Graphics::ResetAllocatorAndCommandList(0);
+	Graphics::ResetAllocatorAndCommandList();
 }
 
 

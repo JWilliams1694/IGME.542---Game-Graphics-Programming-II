@@ -267,18 +267,11 @@ void Game::Draw(float deltaTime, float totalTime)
 	// Grab the current back buffer for this frame
 	Microsoft::WRL::ComPtr<ID3D12Resource> currentBackBuffer =
 		Graphics::BackBuffers[Graphics::SwapChainIndex()];
-	D3D12_RESOURCE_BARRIER rb = {};
-	rb.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	rb.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	rb.Transition.pResource = currentBackBuffer.Get();
-	rb.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-	rb.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	rb.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
 	// Clearing the render target
 	{
 		// Transition the back buffer from present to render target
 
-		Graphics::CommandList->ResourceBarrier(1, &rb);
 		// Background color (Cornflower Blue in this case) for clearing
 		float color[] = { 0.4f, 0.6f, 0.75f, 1.0f };
 		// Clear the RTV
@@ -377,10 +370,6 @@ void Game::Draw(float deltaTime, float totalTime)
 		//rb.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		//rb.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		//rb.Transition.pResource = currentBackBuffer.Get();
-		rb.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		rb.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-		rb.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		Graphics::CommandList->ResourceBarrier(1, &rb);
 		// Must occur BEFORE present
 		Graphics::CloseAndExecuteCommandList();
 		// Present the current back buffer and move to the next one
