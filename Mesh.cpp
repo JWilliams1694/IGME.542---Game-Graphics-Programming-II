@@ -29,14 +29,16 @@ Mesh::Mesh(const char* name, const std::wstring& fileName) :name(name), vbView{}
 	vertexNum = 0;
 	indexNum = 0;
 
-// File input object
+	// File input object
 	std::ifstream obj(fileName);
 
 	// Check for successful open
 	if (!obj.is_open())
-	{printf("Failed to open obj file: %ls\n", fileName.c_str());
-		return; }
-		
+	{
+		printf("Failed to open obj file: %ls\n", fileName.c_str());
+		return;
+	}
+
 
 	// Variables used while reading the file
 	std::vector<XMFLOAT3> positions;	// Positions from the file
@@ -242,12 +244,21 @@ Mesh::~Mesh()
 {
 }
 
-D3D12_VERTEX_BUFFER_VIEW Mesh::GetVertexBuffer()
+Microsoft::WRL::ComPtr<ID3D12Resource> Mesh::GetVertexBuffer()
+{
+	return vertexBuffer;
+}
+
+Microsoft::WRL::ComPtr<ID3D12Resource> Mesh::GetIndexBuffer() {
+	return indexBuffer;
+}
+
+D3D12_VERTEX_BUFFER_VIEW Mesh::GetVertexBufferView()
 {
 	return vbView;
 }
 
-D3D12_INDEX_BUFFER_VIEW Mesh::GetIndexBuffer()
+D3D12_INDEX_BUFFER_VIEW Mesh::GetIndexBufferView()
 {
 	return ibView;
 }

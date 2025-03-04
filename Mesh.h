@@ -13,8 +13,10 @@ public:
 	~Mesh();
 
 	//methods
-	D3D12_VERTEX_BUFFER_VIEW GetVertexBuffer();
-	D3D12_INDEX_BUFFER_VIEW GetIndexBuffer();
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetVertexBuffer();
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetIndexBuffer();
+	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView();
+	D3D12_INDEX_BUFFER_VIEW GetIndexBufferView();
 	const char* GetName();
 	size_t GetIndexCount();
 	size_t GetVertexCount();
