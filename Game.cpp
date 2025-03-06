@@ -269,24 +269,24 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::BackBuffers[Graphics::SwapChainIndex()];
 
 	// Clearing the render target
-	{
-		// Transition the back buffer from present to render target
+	//{
+	//	// Transition the back buffer from present to render target
 
-		// Background color (Cornflower Blue in this case) for clearing
-		float color[] = { 0.4f, 0.6f, 0.75f, 1.0f };
-		// Clear the RTV
-		Graphics::CommandList->ClearRenderTargetView(
-			Graphics::RTVHandles[Graphics::SwapChainIndex()],
-			color,
-			0, 0); // No scissor rectangles
-		// Clear the depth buffer, too
-		Graphics::CommandList->ClearDepthStencilView(
-			Graphics::DSVHandle,
-			D3D12_CLEAR_FLAG_DEPTH,
-			1.0f, // Max depth = 1.0f
-			0, // Not clearing stencil, but need a value
-			0, 0); // No scissor rects
-	}
+	//	// Background color (Cornflower Blue in this case) for clearing
+	//	float color[] = { 0.4f, 0.6f, 0.75f, 1.0f };
+	//	// Clear the RTV
+	//	Graphics::CommandList->ClearRenderTargetView(
+	//		Graphics::RTVHandles[Graphics::SwapChainIndex()],
+	//		color,
+	//		0, 0); // No scissor rectangles
+	//	// Clear the depth buffer, too
+	//	Graphics::CommandList->ClearDepthStencilView(
+	//		Graphics::DSVHandle,
+	//		D3D12_CLEAR_FLAG_DEPTH,
+	//		1.0f, // Max depth = 1.0f
+	//		0, // Not clearing stencil, but need a value
+	//		0, 0); // No scissor rects
+	//}
 	// Perform ray trace (which also copies the results to the back buffer)
 	RayTracing::Raytrace(camera, currentBackBuffer);
 
