@@ -39,7 +39,7 @@ void Game::Initialize()
 	//CreateRootSigAndPipelineState();
 	//CreateGeometry();
 
-	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneAlbedo = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/cobblestone_albedo.png").c_str());
+	/*D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneAlbedo = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/cobblestone_albedo.png").c_str());
 	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneNormals = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/cobblestone_normals.png").c_str());
 	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneRoughness = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/cobblestone_roughness.png").c_str());
 	D3D12_CPU_DESCRIPTOR_HANDLE cobblestoneMetal = Graphics::LoadTexture(FixPath(L"../../Assets/Textures/PBR/cobblestone_metal.png").c_str());
@@ -49,7 +49,7 @@ void Game::Initialize()
 	cobbleMat->AddTexture(cobblestoneNormals, 1);
 	cobbleMat->AddTexture(cobblestoneRoughness, 2);
 	cobbleMat->AddTexture(cobblestoneMetal, 3);
-	cobbleMat->FinalizeMaterial();
+	cobbleMat->FinalizeMaterial();*/
 
 	std::shared_ptr<Mesh> sphereMesh = std::make_shared<Mesh>("Sphere", FixPath(L"../../Assets/Meshes/sphere.obj").c_str());
 
@@ -248,10 +248,10 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
-	for (auto& entity : entities)
+	/*for (auto& entity : entities)
 	{
 		entity->GetTransform()->Rotate(0.5f * deltaTime, deltaTime, 0);
-	}
+	}*/
 	camera->Update(deltaTime);
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::KeyDown(VK_ESCAPE))
@@ -262,44 +262,103 @@ void Game::Update(float deltaTime, float totalTime)
 // --------------------------------------------------------
 // Clear the screen, redraw everything, present to the user
 // --------------------------------------------------------
+//void Game::Draw(float deltaTime, float totalTime)
+//{
+//	// Grab the current back buffer for this frame
+//	Microsoft::WRL::ComPtr<ID3D12Resource> currentBackBuffer =
+//		Graphics::BackBuffers[Graphics::SwapChainIndex()];
+//
+//	// Clearing the render target
+//	{
+//		// Transition the back buffer from present to render target
+//
+//		// Background color (Cornflower Blue in this case) for clearing
+//		float color[] = { 0.4f, 0.6f, 0.75f, 1.0f };
+//		// Clear the RTV
+//		Graphics::CommandList->ClearRenderTargetView(
+//			Graphics::RTVHandles[Graphics::SwapChainIndex()],
+//			color,
+//			0, 0); // No scissor rectangles
+//		// Clear the depth buffer, too
+//		Graphics::CommandList->ClearDepthStencilView(
+//			Graphics::DSVHandle,
+//			D3D12_CLEAR_FLAG_DEPTH,
+//			1.0f, // Max depth = 1.0f
+//			0, // Not clearing stencil, but need a value
+//			0, 0); // No scissor rects
+//	}
+//	// Perform ray trace (which also copies the results to the back buffer)
+//	RayTracing::Raytrace(camera, currentBackBuffer);
+//
+//	{
+//		Graphics::CloseAndExecuteCommandList();
+//		// Present the current back buffer and move to the next one
+//		bool vsync = Graphics::VsyncState();
+//		Graphics::SwapChain->Present(
+//			vsync ? 1 : 0,
+//			vsync ? 0 : DXGI_PRESENT_ALLOW_TEARING);
+//		Graphics::AdvanceSwapChainIndex();
+//		// Wait for the GPU to be done and then reset the command list & allocator
+//		Graphics::WaitForGPU();
+//		Graphics::ResetAllocatorAndCommandList();
+//	}
+//}
+
+// --------------------------------------------------------
+// Clear the screen, redraw everything, present to the user
+// --------------------------------------------------------
 void Game::Draw(float deltaTime, float totalTime)
 {
 	// Grab the current back buffer for this frame
-	Microsoft::WRL::ComPtr<ID3D12Resource> currentBackBuffer =
-		Graphics::BackBuffers[Graphics::SwapChainIndex()];
+	Microsoft::WRL::ComPtr<ID3D12Resource> currentBackBuffer = Graphics::BackBuffers[Graphics::SwapChainIndex()];
 
-	// Clearing the render target
+	// Prepare a resoruce barrier for various transitions below
+	D3D12_RESOURCE_BARRIER rb = {};
+	rb.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	rb.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	rb.Transition.pResource = currentBackBuffer.Get();
+	rb.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+	// Raytracing
 	{
-		// Transition the back buffer from present to render target
-
-		// Background color (Cornflower Blue in this case) for clearing
-		float color[] = { 0.4f, 0.6f, 0.75f, 1.0f };
-		// Clear the RTV
-		Graphics::CommandList->ClearRenderTargetView(
-			Graphics::RTVHandles[Graphics::SwapChainIndex()],
-			color,
-			0, 0); // No scissor rectangles
-		// Clear the depth buffer, too
-		Graphics::CommandList->ClearDepthStencilView(
-			Graphics::DSVHandle,
-			D3D12_CLEAR_FLAG_DEPTH,
-			1.0f, // Max depth = 1.0f
-			0, // Not clearing stencil, but need a value
-			0, 0); // No scissor rects
+		RayTracing::Raytrace(camera, currentBackBuffer);
 	}
-	// Perform ray trace (which also copies the results to the back buffer)
-	RayTracing::Raytrace(camera, currentBackBuffer);
 
+	// ImGui Render after all other scene objects
 	{
+		// The raytracing call above assumes we'll be presenting immediately afterwards,
+		// which leaves the back buffer in the PRESENT state.  We'll need to transition
+		// back to RENDER_TARGET so that ImGui can also render.  This is definitely
+		// an extra step, and could be generalized by not automatically transitioning
+		// to PRESENT at the end of raytracing.
+		rb.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+		rb.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		Graphics::CommandList->ResourceBarrier(1, &rb);
+
+		// ImGui needs the descriptor heap (where its font texture lives) and the render target
+		Graphics::CommandList->SetDescriptorHeaps(1, Graphics::CBVSRVDescriptorHeap.GetAddressOf());
+		Graphics::CommandList->OMSetRenderTargets(1, &Graphics::RTVHandles[Graphics::SwapChainIndex()], true, 0);
+
+	}
+
+	// Present
+	{
+		// Transition back to present
+		rb.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		rb.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+		Graphics::CommandList->ResourceBarrier(1, &rb);
+
+		// Must occur BEFORE present
 		Graphics::CloseAndExecuteCommandList();
+
 		// Present the current back buffer and move to the next one
 		bool vsync = Graphics::VsyncState();
 		Graphics::SwapChain->Present(
 			vsync ? 1 : 0,
 			vsync ? 0 : DXGI_PRESENT_ALLOW_TEARING);
 		Graphics::AdvanceSwapChainIndex();
-		// Wait for the GPU to be done and then reset the command list & allocator
-		Graphics::WaitForGPU();
+
+		// Reset the command list & allocator for the upcoming frame
 		Graphics::ResetAllocatorAndCommandList();
 	}
 }
