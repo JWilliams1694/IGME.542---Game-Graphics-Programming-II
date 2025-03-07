@@ -269,108 +269,28 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::BackBuffers[Graphics::SwapChainIndex()];
 
 	// Clearing the render target
-	//{
-	//	// Transition the back buffer from present to render target
+	{
+		// Transition the back buffer from present to render target
 
-	//	// Background color (Cornflower Blue in this case) for clearing
-	//	float color[] = { 0.4f, 0.6f, 0.75f, 1.0f };
-	//	// Clear the RTV
-	//	Graphics::CommandList->ClearRenderTargetView(
-	//		Graphics::RTVHandles[Graphics::SwapChainIndex()],
-	//		color,
-	//		0, 0); // No scissor rectangles
-	//	// Clear the depth buffer, too
-	//	Graphics::CommandList->ClearDepthStencilView(
-	//		Graphics::DSVHandle,
-	//		D3D12_CLEAR_FLAG_DEPTH,
-	//		1.0f, // Max depth = 1.0f
-	//		0, // Not clearing stencil, but need a value
-	//		0, 0); // No scissor rects
-	//}
+		// Background color (Cornflower Blue in this case) for clearing
+		float color[] = { 0.4f, 0.6f, 0.75f, 1.0f };
+		// Clear the RTV
+		Graphics::CommandList->ClearRenderTargetView(
+			Graphics::RTVHandles[Graphics::SwapChainIndex()],
+			color,
+			0, 0); // No scissor rectangles
+		// Clear the depth buffer, too
+		Graphics::CommandList->ClearDepthStencilView(
+			Graphics::DSVHandle,
+			D3D12_CLEAR_FLAG_DEPTH,
+			1.0f, // Max depth = 1.0f
+			0, // Not clearing stencil, but need a value
+			0, 0); // No scissor rects
+	}
 	// Perform ray trace (which also copies the results to the back buffer)
 	RayTracing::Raytrace(camera, currentBackBuffer);
 
-	// Rendering here!
-	//{
-	//	// Set overall pipeline state
-	//	Graphics::CommandList->SetPipelineState(pipelineState.Get());
-	//	// Root sig (must happen before root descriptor table)
-	//	Graphics::CommandList->SetGraphicsRootSignature(rootSignature.Get());
-	//	Graphics::CommandList->SetDescriptorHeaps(1, Graphics::CBVSRVDescriptorHeap.GetAddressOf());
-
-	//	// Set up other commands for rendering
-	//	Graphics::CommandList->OMSetRenderTargets(
-	//		1, &Graphics::RTVHandles[Graphics::SwapChainIndex()], true, &Graphics::DSVHandle);
-	//	Graphics::CommandList->RSSetViewports(1, &viewport);
-	//	Graphics::CommandList->RSSetScissorRects(1, &scissorRect);
-	//	Graphics::CommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	//	for (auto& entity : entities)
-	//	{
-	//		// grab the current entity’s material
-	//		std::shared_ptr<Material> mat = entity->GetMaterial();
-	//		//set the pipeline state this material intends to use
-	//		Graphics::CommandList->SetPipelineState(mat->GetPipelineState().Get());
-	//		// Set the SRV descriptor handle for this material's textures
-	//		// Note: This assumes that descriptor table 2 is for textures (as per our root sig)
-	//		Graphics::CommandList->SetGraphicsRootDescriptorTable(2, mat->GetFinalGPUHandleForSRVs());
-
-	//		//Fill out a VertexShaderExternalData struct with the entity’s world matrix and the camera’s matrices
-	//		VertexShaderExternalData vsData = {};
-	//		vsData.world = entity->GetTransform()->GetWorldMatrix();
-	//		vsData.worldInvTranspose = entity->GetTransform()->GetWorldInverseTransposeMatrix();
-	//		vsData.view = camera->GetViewMatrix();
-	//		vsData.projection = camera->GetProjMatrix();
-
-	//		//Use FillNextConstantBufferAndGetGPUDescriptorHandle() to copy the above struct to the GPU
-	//		// and get back the corresponding handle to the constant buffer view.
-	//		D3D12_GPU_DESCRIPTOR_HANDLE cbHandle = Graphics::FillNextConstantBufferAndGetGPUDescriptorHandle((void*)(&vsData), sizeof(VertexShaderExternalData));
-
-	//		//Use commandList->SetGraphicsRootDescriptorTable(0, handle) to set the handle from the previous line.
-	//		Graphics::CommandList->SetGraphicsRootDescriptorTable(0, cbHandle);
-
-	//		// Pixel shader data and cbuffer setup
-	//		{
-	//			PixelShaderExternalData psData = {};
-	//			psData.uvScale = mat->GetUVScale();
-	//			psData.uvOffset = mat->GetUVOffset();
-	//			psData.cameraPosition = camera->GetTransform()->GetPosition();
-	//			psData.lightCount = lightCount;
-	//			memcpy(psData.lights, &lights[0], sizeof(Light) * MAX_LIGHTS);
-	//			// Send this to a chunk of the constant buffer heap
-	//			// and grab the GPU handle for it so we can set it for this draw
-	//			D3D12_GPU_DESCRIPTOR_HANDLE cbHandlePS =
-	//				Graphics::FillNextConstantBufferAndGetGPUDescriptorHandle(
-	//					(void*)(&psData), sizeof(PixelShaderExternalData));
-	//			// Set this constant buffer handle
-	//			// Note: This assumes that descriptor table 1 is the
-	//			// place to put this particular descriptor. This
-	//			// is based on how we set up our root signature.
-	//			Graphics::CommandList->SetGraphicsRootDescriptorTable(
-	//				1, cbHandlePS);
-	//		}
-
-	//		//Grab the vertex buffer view and index buffer view from this entity’s mesh
-	//		std::shared_ptr<Mesh> mesh = entity->GetMesh();
-	//		D3D12_VERTEX_BUFFER_VIEW vbv = mesh->GetVertexBufferView();
-	//		D3D12_INDEX_BUFFER_VIEW  ibv = mesh->GetIndexBufferView();
-
-	//		//Set them using IASetVertexBuffers() and IASetIndexBuffer()
-	//		Graphics::CommandList->IASetVertexBuffers(0, 1, &vbv);
-	//		Graphics::CommandList->IASetIndexBuffer(&ibv);
-
-	//		//Call DrawIndexedInstanced() using the index count of this entity’s mesh
-	//		Graphics::CommandList->DrawIndexedInstanced((UINT)mesh->GetIndexCount(), 1, 0, 0, 0);
-	//	}
-	//}
-	// Present
 	{
-		// Transition back to present
-		//D3D12_RESOURCE_BARRIER rb = {};
-		//rb.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		//rb.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		//rb.Transition.pResource = currentBackBuffer.Get();
-		// Must occur BEFORE present
 		Graphics::CloseAndExecuteCommandList();
 		// Present the current back buffer and move to the next one
 		bool vsync = Graphics::VsyncState();
