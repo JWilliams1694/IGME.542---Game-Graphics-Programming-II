@@ -8,6 +8,8 @@
 #include "Camera.h"
 #include <memory>
 #include "Lights.h"
+#include "Material.h"
+#include "Material.h"
 
 class Game
 {
@@ -28,8 +30,8 @@ private:
 
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	//void CreateRootSigAndPipelineState();
-	//void CreateGeometry();
-	//void CreateLights();
+	void CreateGeometry();
+	void CreateLights();
 
 	// Note the usage of ComPtr below
 	//  - This is a smart pointer for objects that abide by the
@@ -50,10 +52,15 @@ private:
 
 	std::shared_ptr<Camera> camera;
 	std::vector<std::shared_ptr<Mesh>> meshes;
+	std::shared_ptr<Mesh> sphereMesh;
+	std::shared_ptr<Mesh> cubeMesh;
+	std::shared_ptr<Mesh> helixMesh;
 	std::vector<std::shared_ptr<GameEntity>> entities;
+	std::vector<std::shared_ptr<Material>> materials;
 
 	//lights
-	//std::vector<Light> lights;
-	//int lightCount = 0;
+	std::vector<Light> lights;
+	int lightCount = 0;
+	int maxShapes = 20;
 };
 

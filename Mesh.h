@@ -5,6 +5,14 @@
 #include "Vertex.h"
 using Microsoft::WRL::ComPtr;
 
+struct MeshRaytracingData
+{
+	D3D12_GPU_DESCRIPTOR_HANDLE IndexBufferSRV{ };
+	D3D12_GPU_DESCRIPTOR_HANDLE VertexBufferSRV{ };
+	Microsoft::WRL::ComPtr<ID3D12Resource> BLAS;
+	unsigned int HitGroupIndex = 0;
+};
+
 class Mesh
 {
 public:
@@ -20,6 +28,7 @@ public:
 	const char* GetName();
 	size_t GetIndexCount();
 	size_t GetVertexCount();
+	MeshRaytracingData GetRaytracingData();
 private:
 	const char* name;
 	//buffers
@@ -30,6 +39,8 @@ private:
 	//counts
 	size_t indexNum;
 	size_t vertexNum;
+
+	MeshRaytracingData raytracingData;
 
 	//method to create buffer for constructor
 	void CreateBuffer(Vertex* vertices, unsigned int* indices, size_t  vertexNum, size_t  indexNum);

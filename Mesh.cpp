@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <DirectXMath.h>
+#include "RayTracing.h"
 using namespace DirectX;
 
 /// <summary>
@@ -278,6 +279,12 @@ size_t Mesh::GetVertexCount()
 	return vertexNum;
 }
 
+MeshRaytracingData Mesh::GetRaytracingData()
+{
+	return raytracingData;
+}
+
+
 void Mesh::CreateBuffer(Vertex* vertices, unsigned int* indices, size_t  vertexNum, size_t  indexNum)
 {
 	this->vertexNum = vertexNum;
@@ -297,6 +304,9 @@ void Mesh::CreateBuffer(Vertex* vertices, unsigned int* indices, size_t  vertexN
 	ibView.Format = DXGI_FORMAT_R32_UINT;
 	ibView.SizeInBytes = (UINT)(sizeof(unsigned int) * indexNum);
 	ibView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
+
+	// Create the raytracing acceleration structure for this mesh
+	raytracingData = RayTracing::CreateBottomLevelAccelerationStructureForMesh(this);
 }
 
 // --------------------------------------------------------
