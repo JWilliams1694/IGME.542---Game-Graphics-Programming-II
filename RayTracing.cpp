@@ -286,7 +286,7 @@ void RayTracing::CreateRaytracingPipelineState(std::wstring raytracingShaderLibr
 
 	// === Shader config (payload) ===
 	D3D12_RAYTRACING_SHADER_CONFIG shaderConfigDesc = {};
-	shaderConfigDesc.MaxPayloadSizeInBytes = sizeof(DirectX::XMFLOAT3);	// Assuming a float3 color for now
+	shaderConfigDesc.MaxPayloadSizeInBytes = sizeof(DirectX::XMFLOAT3) + sizeof(unsigned int) * 2;	
 	shaderConfigDesc.MaxAttributeSizeInBytes = sizeof(DirectX::XMFLOAT2); // Assuming a float2 for barycentric coords for now
 
 	D3D12_STATE_SUBOBJECT shaderConfigSubObj = {};
@@ -623,7 +623,7 @@ MeshRaytracingData RayTracing::CreateBottomLevelAccelerationStructureForMesh(Mes
 	// We need to put this mesh's SRVs into the shader table
 	// - In a larger application, each unique mesh will need its own entry in the shader table!
 	unsigned char* tablePointer = 0;
-	
+
 	ShaderTable->Map(0, 0, (void**)&tablePointer);
 	{
 		tablePointer += ShaderTableRecordSize * 2; // Get past raygen and miss shaders
@@ -819,6 +819,7 @@ void RayTracing::Raytrace(std::shared_ptr<Camera> camera, Microsoft::WRL::ComPtr
 	// Grab and fill a constant buffer
 	RaytracingSceneData sceneData = {};
 	sceneData.cameraPosition = camera->GetTransform()->GetPosition();
+	sceneData.raysPerPixel = 25;
 
 	DirectX::XMFLOAT4X4 view = camera->GetViewMatrix();
 	DirectX::XMFLOAT4X4 proj = camera->GetProjMatrix();
@@ -842,9 +843,9 @@ void RayTracing::Raytrace(std::shared_ptr<Camera> camera, Microsoft::WRL::ComPtr
 		// Set the global root sig so we can also set descriptor tables
 		DXRCommandList->SetComputeRootSignature(GlobalRaytracingRootSig.Get());
 		DXRCommandList->SetComputeRootDescriptorTable(0,			// First table is just output UAV
-			RaytracingOutputUAV_GPU);
+													  RaytracingOutputUAV_GPU);
 		DXRCommandList->SetComputeRootShaderResourceView(1,			// Second is SRV for accel structure (as root SRV, no table needed)
-			TLAS->GetGPUVirtualAddress());
+														 TLAS->GetGPUVirtualAddress());
 		DXRCommandList->SetComputeRootDescriptorTable(2, cbuffer);	// Third is CBV
 
 		// Dispatch rays
