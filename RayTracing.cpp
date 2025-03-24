@@ -784,7 +784,6 @@ void RayTracing::CreateTopLevelAccelerationStructureForScene(std::vector<std::sh
 		// Need to get to the first descriptor in this hit group's record
 		unsigned char* hitGroupPointer = tablePointer + ShaderTableRecordSize * i;
 		hitGroupPointer += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES; // Get past identifier
-		hitGroupPointer += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE); // Get past geometry SRV
 
 		// Copy the data to the CB ring buffer and grab associated CBV to place in shader table
 		D3D12_GPU_DESCRIPTOR_HANDLE cbv = Graphics::FillNextConstantBufferAndGetGPUDescriptorHandle(&entityData[i], sizeof(RaytracingEntityData));
