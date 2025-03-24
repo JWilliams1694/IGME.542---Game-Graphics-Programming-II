@@ -168,15 +168,17 @@ void RayTracing::CreateRaytracingRootSignatures()
 		D3D12_ROOT_PARAMETER rootParams[2] = {};
 
 		// Range of SRVs for geometry (verts & indices)
+		
+
 		rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 		rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 		rootParams[0].DescriptorTable.NumDescriptorRanges = 1;
-		rootParams[0].DescriptorTable.pDescriptorRanges = &geometrySRVRange;
+		rootParams[0].DescriptorTable.pDescriptorRanges = &cbufferRange;
 
 		rootParams[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 		rootParams[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 		rootParams[1].DescriptorTable.NumDescriptorRanges = 1;
-		rootParams[1].DescriptorTable.pDescriptorRanges = &cbufferRange;
+		rootParams[1].DescriptorTable.pDescriptorRanges = &geometrySRVRange;
 
 		// Create the local root sig (ensure we denote it as a local sig)
 		Microsoft::WRL::ComPtr<ID3DBlob> blob;
@@ -629,6 +631,8 @@ MeshRaytracingData RayTracing::CreateBottomLevelAccelerationStructureForMesh(Mes
 		tablePointer += ShaderTableRecordSize * 2; // Get past raygen and miss shaders
 		tablePointer += ShaderTableRecordSize * rayTracingData.HitGroupIndex; // Hit group
 		tablePointer += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES; // Get past the identifier
+		tablePointer += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
+		memcpy(tablePointer, &rayTracingData.IndexBufferSRV, sizeof(D3D12_GPU_DESCRIPTOR_HANDLE));
 	}
 	// All done
 	ShaderTable->Unmap(0, 0);
