@@ -38,7 +38,7 @@ void Game::Initialize()
 
 	maxShapes = 50;
 	lightCount = 32;
-	CreateLights();
+	//CreateLights();
 	camera = std::make_shared<Camera>(XMFLOAT3(0, 0, -20), Window::AspectRatio(), XM_PIDIV4);
 	
 	materials.push_back( std::make_shared<Material>(pipelineState, XMFLOAT3(0.5f, 0.5f, 0.5f)));

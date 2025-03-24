@@ -181,7 +181,7 @@ void RayGen()
 	uint2 rayIndices = DispatchRaysIndex().xy;
 
 	float3 totalColor = float3(0, 0, 0);
-	int raysPerPixel = 25;
+	//int raysPerPixel = 25;
 	for (int r = 0; r < raysPerPixel; r++)
 	{
 		float2 adjustedIndices = (float2)rayIndices;
@@ -213,10 +213,7 @@ void RayGen()
 		totalColor += payload.color;
 	}
 	// Average results
-	float3 avg = totalColor;
-
-
-
+	float3 avg = totalColor/raysPerPixel;
 
 	// Set the final color of the buffer
 	OutputColor[rayIndices] = float4(pow(avg, 1.0f / 2.2f), 1);
@@ -229,7 +226,7 @@ void Miss(inout RayPayload payload)
 {
 	// Nothing was hit, so return black for now.
 	// Ideally this is where we would do skybox stuff!
-    //payload.color = float3(0.4f, 0.6f, 0.75f);
+   // payload.color = float3(0.4f, 0.6f, 0.75f);
 	// Hemispheric gradient
 	float3 upColor = float3(0.3f, 0.5f, 0.95f);
 	float3 downColor = float3(1, 1, 1);
