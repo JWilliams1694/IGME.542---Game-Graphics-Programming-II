@@ -168,7 +168,7 @@ void RayTracing::CreateRaytracingRootSignatures()
 		D3D12_ROOT_PARAMETER rootParams[2] = {};
 
 		// Range of SRVs for geometry (verts & indices)
-		
+
 
 		rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 		rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -288,7 +288,7 @@ void RayTracing::CreateRaytracingPipelineState(std::wstring raytracingShaderLibr
 
 	// === Shader config (payload) ===
 	D3D12_RAYTRACING_SHADER_CONFIG shaderConfigDesc = {};
-	shaderConfigDesc.MaxPayloadSizeInBytes = sizeof(DirectX::XMFLOAT3) + sizeof(unsigned int) * 2;	
+	shaderConfigDesc.MaxPayloadSizeInBytes = sizeof(DirectX::XMFLOAT3) + sizeof(unsigned int) * 2;
 	shaderConfigDesc.MaxAttributeSizeInBytes = sizeof(DirectX::XMFLOAT2); // Assuming a float2 for barycentric coords for now
 
 	D3D12_STATE_SUBOBJECT shaderConfigSubObj = {};
@@ -846,9 +846,9 @@ void RayTracing::Raytrace(std::shared_ptr<Camera> camera, Microsoft::WRL::ComPtr
 		// Set the global root sig so we can also set descriptor tables
 		DXRCommandList->SetComputeRootSignature(GlobalRaytracingRootSig.Get());
 		DXRCommandList->SetComputeRootDescriptorTable(0,			// First table is just output UAV
-													  RaytracingOutputUAV_GPU);
+			RaytracingOutputUAV_GPU);
 		DXRCommandList->SetComputeRootShaderResourceView(1,			// Second is SRV for accel structure (as root SRV, no table needed)
-														 TLAS->GetGPUVirtualAddress());
+			TLAS->GetGPUVirtualAddress());
 		DXRCommandList->SetComputeRootDescriptorTable(2, cbuffer);	// Third is CBV
 
 		// Dispatch rays

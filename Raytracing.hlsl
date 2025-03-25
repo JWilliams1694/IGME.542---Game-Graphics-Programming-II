@@ -263,8 +263,6 @@ void ClosestHit(inout RayPayload payload, BuiltInTriangleIntersectionAttributes 
     float3 refl = reflect(WorldRayDirection(), normal_WS);
     float3 randomBounce = RandomCosineWeightedHemisphere(rand(rng), rand(rng.yx), normal_WS);
     float3 dir = normalize(lerp(refl, randomBounce, entityColor[InstanceID()].a));
-
-
 	
     RayDesc ray;
     ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
