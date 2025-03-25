@@ -41,8 +41,8 @@ void Game::Initialize()
 	//CreateLights();
 	camera = std::make_shared<Camera>(XMFLOAT3(0, 0, -20), Window::AspectRatio(), XM_PIDIV4);
 	
-	materials.push_back( std::make_shared<Material>(pipelineState, XMFLOAT3(0.5f, 0.5f, 0.5f)));
-	materials.push_back(std::make_shared<Material>(pipelineState, XMFLOAT3(1,0,0)));
+	materials.push_back( std::make_shared<Material>(pipelineState, XMFLOAT3(0.5f, 0.5f, 0.5f),0.2f));
+	materials.push_back(std::make_shared<Material>(pipelineState, XMFLOAT3(1,0,0),0.0f));
 
 	cubeMesh = std::make_shared<Mesh>("Cube", FixPath(L"../../Assets/Meshes/cube.obj").c_str());
 	sphereMesh = std::make_shared<Mesh>("Sphere", FixPath(L"../../Assets/Meshes/sphere.obj").c_str());
@@ -85,7 +85,7 @@ void Game::CreateGeometry()
 	entities.push_back(floor);
 
 	std::shared_ptr<GameEntity> helix = std::make_shared<GameEntity>(helixMesh, materials[1]);
-	helix->GetTransform()->SetScale(1, 2, 1);
+	helix->GetTransform()->SetScale(2, 2, 2);
 	helix->GetTransform()->SetPosition(0, 3, 0);
 	entities.push_back(helix);
 
@@ -94,7 +94,8 @@ void Game::CreateGeometry()
 		std::shared_ptr<Material> mat = std::make_shared<Material>(pipelineState, XMFLOAT3(
 			Random(0.0f, 1.0f),
 			Random(0.0f, 1.0f),
-			Random(0.0f, 1.0f)));
+			Random(0.0f, 1.0f)),
+			Random(0.0f, 1.0f));
 
 		float scale = Random(0.25f, 1.0f);
 
@@ -199,10 +200,10 @@ void Game::Update(float deltaTime, float totalTime)
 
 
 			// Calculate the new scale using a sine wave function with a time offset
-			float timeOffset = i * 0.1f; // Adjust the offset as needed
-			float scale = 0.5f + 0.5f * sin(totalTime * 2.0f + timeOffset); // Adjust the frequency as needed
-			scale = max(scale, 0.1f); // Ensure the scale does not go below 0.1
-			entities[i]->GetTransform()->SetScale(scale, scale, scale);
+			//float timeOffset = i * 0.1f; // Adjust the offset as needed
+			//float scale = 0.5f + 0.5f * sin(totalTime * 2.0f + timeOffset); 
+			//scale = max(scale, 0.1f); // Ensure the scale does not go below 0.1
+			//entities[i]->GetTransform()->SetScale(scale, scale, scale);
 		}
 	}
 	camera->Update(deltaTime);

@@ -1,8 +1,9 @@
 #include "Material.h"
 #include "Graphics.h"
 
-Material::Material(Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState,DirectX::XMFLOAT3 tint, DirectX::XMFLOAT2 uvScale, DirectX::XMFLOAT2 uvOffset) :
+Material::Material(Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState,DirectX::XMFLOAT3 tint, float roughness, DirectX::XMFLOAT2 uvScale, DirectX::XMFLOAT2 uvOffset) :
 	tint(tint),
+	roughness(roughness),
 	uvScale(uvScale),
 	uvOffset(uvOffset),
 	pipelineState(pipelineState)
@@ -16,6 +17,11 @@ Material::Material(Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState,Dir
 void Material::SetTint(DirectX::XMFLOAT3 tint)
 {
 	this->tint = tint;
+}
+
+void Material::SetRoughness(float roughness)
+{
+		this->roughness = roughness;
 }
 
 void Material::SetUVScale(DirectX::XMFLOAT2 uvScale)
@@ -32,6 +38,12 @@ DirectX::XMFLOAT3 Material::GetTint()
 {
 	return tint;
 }
+
+float Material::GetRoughness()
+{
+	return roughness;
+}
+
 
 DirectX::XMFLOAT2 Material::GetUVScale()
 {

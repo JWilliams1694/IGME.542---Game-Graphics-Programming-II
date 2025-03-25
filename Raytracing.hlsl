@@ -224,9 +224,7 @@ void RayGen()
 [shader("miss")]
 void Miss(inout RayPayload payload)
 {
-	// Nothing was hit, so return black for now.
-	// Ideally this is where we would do skybox stuff!
-   // payload.color = float3(0.4f, 0.6f, 0.75f);
+	
 	// Hemispheric gradient
     float3 upColor = float3(0.3f, 0.5f, 0.95f);
     float3 downColor = float3(1, 1, 1);
