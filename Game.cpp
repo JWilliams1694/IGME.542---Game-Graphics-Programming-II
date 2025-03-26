@@ -36,22 +36,22 @@ void Game::Initialize()
 		Window::Height(),
 		FixPath(L"RayTracing.cso"));
 
-	maxShapes = 50;
+	maxShapes = 100;
 	lightCount = 32;
 	//CreateLights();
 	camera = std::make_shared<Camera>(XMFLOAT3(0, 0, -20), Window::AspectRatio(), XM_PIDIV4);
-	
-	materials.push_back( std::make_shared<Material>(pipelineState, XMFLOAT3(0.5f, 0.5f, 0.5f),0.2f));
-	materials.push_back(std::make_shared<Material>(pipelineState, XMFLOAT3(1,0,0),0.0f));
 
-	cubeMesh = std::make_shared<Mesh>("Cube", FixPath(L"../../Assets/Meshes/cube.obj").c_str());
-	sphereMesh = std::make_shared<Mesh>("Sphere", FixPath(L"../../Assets/Meshes/sphere.obj").c_str());
-	helixMesh = std::make_shared<Mesh>("Helix", FixPath(L"../../Assets/Meshes/helix.obj").c_str());
+	materials.push_back(std::make_shared<Material>(pipelineState, XMFLOAT3(0.5f, 0.5f, 0.5f), 0.2f));
+	materials.push_back(std::make_shared<Material>(pipelineState, XMFLOAT3(1, 1, 1), 0.0f));
 
-	
+	meshes.push_back(std::make_shared<Mesh>("Cube", FixPath(L"../../Assets/Meshes/cube.obj").c_str()));
+	meshes.push_back(std::make_shared<Mesh>("Sphere", FixPath(L"../../Assets/Meshes/sphere.obj").c_str()));
+	meshes.push_back(std::make_shared<Mesh>("Helix", FixPath(L"../../Assets/Meshes/helix.obj").c_str()));
+	meshes.push_back(std::make_shared<Mesh>("Torus", FixPath(L"../../Assets/Meshes/torus.obj").c_str()));
+	meshes.push_back(std::make_shared<Mesh>("Cylinder", FixPath(L"../../Assets/Meshes/cylinder.obj").c_str()));
+	meshes.push_back(std::make_shared<Mesh>("Quad", FixPath(L"../../Assets/Meshes/quad_double_sided.obj").c_str()));
+
 	CreateGeometry();
-
-
 
 	// Create a BLAS for a single mesh, then the TLAS for our “scene”
 	RayTracing::CreateTopLevelAccelerationStructureForScene(entities);
@@ -79,15 +79,15 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::CreateGeometry()
 {
-	std::shared_ptr<GameEntity> floor = std::make_shared<GameEntity>(cubeMesh, materials[0]);
+	std::shared_ptr<GameEntity> floor = std::make_shared<GameEntity>(meshes[0], materials[0]);
 	floor->GetTransform()->SetScale(15, 15, 15);
 	floor->GetTransform()->SetPosition(0, -25, 0);
 	entities.push_back(floor);
 
-	std::shared_ptr<GameEntity> helix = std::make_shared<GameEntity>(helixMesh, materials[1]);
-	helix->GetTransform()->SetScale(2, 2, 2);
-	helix->GetTransform()->SetPosition(0, 3, 0);
-	entities.push_back(helix);
+	std::shared_ptr<GameEntity> donut = std::make_shared<GameEntity>(meshes[3], materials[1]);
+	donut->GetTransform()->SetScale(2.5f, 2.5f, 2.5f);
+	donut->GetTransform()->SetPosition(0, 3, 0);
+	entities.push_back(donut);
 
 	for (int i = 0; i < maxShapes; i++)
 	{
@@ -99,18 +99,11 @@ void Game::CreateGeometry()
 
 		float scale = Random(0.25f, 1.0f);
 
-		std::shared_ptr<GameEntity> sphere = std::make_shared<GameEntity>(sphereMesh, mat);
-		sphere->GetTransform()->SetScale(scale, scale, scale);
-		sphere->GetTransform()->SetPosition(
+		std::shared_ptr<GameEntity> shape = std::make_shared<GameEntity>(meshes[i % meshes.size()], mat);
+		shape->GetTransform()->SetScale(scale, scale, scale);
+		shape->GetTransform()->SetPosition(
 			Random(-10, 10), Random(-10, 10), Random(-10, 10));
-		entities.push_back(sphere);
-
-		std::shared_ptr<GameEntity> cube = std::make_shared<GameEntity>(cubeMesh, mat);
-		cube->GetTransform()->SetScale(scale, scale, scale);
-		cube->GetTransform()->SetPosition(
-			Random(-10, 10), Random(-10, 10), Random(-10, 10));
-
-		entities.push_back(cube);
+		entities.push_back(shape);
 	}
 }
 

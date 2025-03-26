@@ -52,9 +52,6 @@ private:
 
 	std::shared_ptr<Camera> camera;
 	std::vector<std::shared_ptr<Mesh>> meshes;
-	std::shared_ptr<Mesh> sphereMesh;
-	std::shared_ptr<Mesh> cubeMesh;
-	std::shared_ptr<Mesh> helixMesh;
 	std::vector<std::shared_ptr<GameEntity>> entities;
 	std::vector<std::shared_ptr<Material>> materials;
 
