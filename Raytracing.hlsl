@@ -267,10 +267,9 @@ void ClosestHit(inout RayPayload payload, BuiltInTriangleIntersectionAttributes 
         // Refractive material
         float3 incident = WorldRayDirection();
         float3 refracted;
-        float ri = 1.0f / 1.5f;
+        float ri =frontFace;
         float direction;
 
-// Calculate cos_theta and sin_theta
         float cos_theta = min(dot(-incident, normal_WS), 1.0f);
         float sin_theta = sqrt(1.0f - cos_theta * cos_theta);
 
