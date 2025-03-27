@@ -86,8 +86,13 @@ void Game::CreateGeometry()
 
 	std::shared_ptr<GameEntity> donut = std::make_shared<GameEntity>(meshes[3], materials[1]);
 	donut->GetTransform()->SetScale(2.5f, 2.5f, 2.5f);
-	donut->GetTransform()->SetPosition(0, 3, 0);
+	donut->GetTransform()->SetPosition(-3, 3, 0);
 	entities.push_back(donut);
+
+	std::shared_ptr<GameEntity> sphere = std::make_shared<GameEntity>(meshes[1], materials[1]);
+	sphere->GetTransform()->SetScale(2.5f, 2.5f, 2.5f);
+	sphere->GetTransform()->SetPosition(3, 2, 0);
+	entities.push_back(sphere);
 
 	for (int i = 0; i < maxShapes; i++)
 	{

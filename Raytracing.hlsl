@@ -258,25 +258,91 @@ void ClosestHit(inout RayPayload payload, BuiltInTriangleIntersectionAttributes 
     float2 uv = (float2) DispatchRaysIndex().xy / DispatchRaysDimensions().xy;
     float2 rng = rand2(uv * (payload.recursionDepth + 1) + payload.rayPerPixelIndex + RayTCurrent());
 
-    float3 refl = reflect(WorldRayDirection(), normal_WS);
-    float3 randomBounce = RandomCosineWeightedHemisphere(rand(rng), rand(rng.yx), normal_WS);
-    float3 dir = normalize(lerp(refl, randomBounce, entityColor[InstanceID()].a));
-	
-    RayDesc ray;
-    ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
-    ray.Direction = dir;
-    ray.TMin = 0.0001f;
-    ray.TMax = 1000.0f;
+    bool frontFace = dot(WorldRayDirection(), normal_WS) < 0;
+    
+    // Determine if the material is reflective or refractive
+    bool isRefractive = entityColor[InstanceID()].a > 0.5f; 
+    if (isRefractive)
+    {
+        // Refractive material
+        float3 incident = WorldRayDirection();
+        float3 refracted;
+        float ri = 1.0f / 1.5f;
+        float direction;
 
-	// Recursive ray trace
-    payload.recursionDepth++;
-    TraceRay(
-		SceneTLAS,
-		RAY_FLAG_NONE,
-		0xFF, 0, 0, 0, // Mask and offsets
-		ray,
-		payload);
-	
-	
+// Calculate cos_theta and sin_theta
+        float cos_theta = min(dot(-incident, normal_WS), 1.0f);
+        float sin_theta = sqrt(1.0f - cos_theta * cos_theta);
+
+        // Determine if refraction is possible
+        bool cannot_refract = ri * sin_theta > 1.0f;
+
+        if (cannot_refract)
+        {
+            // Total internal reflection
+            direction = reflect(incident, normal_WS);
+        }
+        else
+        {
+            // Refraction
+            direction = refract(incident, normal_WS, ri);
+        }
+
+     
+        
+        RayDesc ray;
+        ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
+        ray.Direction = refracted;
+        ray.TMin = 0.0001f;
+        ray.TMax = 1000.0f;
+
+        // Recursive ray trace
+        payload.recursionDepth++;
+        TraceRay(
+            SceneTLAS,
+            RAY_FLAG_NONE,
+            0xFF, 0, 0, 0, // Mask and offsets
+            ray,
+            payload);
+    }
+    else
+    {
+        // Reflective material
+        float3 refl = reflect(WorldRayDirection(), normal_WS);
+        float3 randomBounce = RandomCosineWeightedHemisphere(rand(rng), rand(rng.yx), normal_WS);
+        float3 dir = normalize(lerp(refl, randomBounce, entityColor[InstanceID()].a));
+
+        RayDesc ray;
+        ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
+        ray.Direction = dir;
+        ray.TMin = 0.0001f;
+        ray.TMax = 1000.0f;
+
+        // Recursive ray trace
+        payload.recursionDepth++;
+        TraceRay(
+            SceneTLAS,
+            RAY_FLAG_NONE,
+            0xFF, 0, 0, 0, // Mask and offsets
+            ray,
+            payload);
+    }
+//    float3 refl = reflect(WorldRayDirection(), normal_WS);
+//    float3 randomBounce = RandomCosineWeightedHemisphere(rand(rng), rand(rng.yx), normal_WS);
+//    float3 dir = normalize(lerp(refl, randomBounce, entityColor[InstanceID()].a));
+//	
+//    RayDesc ray;
+//    ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
+//    ray.Direction = dir;
+//    ray.TMin = 0.0001f;
+//    ray.TMax = 1000.0f;
+//
+//	// Recursive ray trace
+//    payload.recursionDepth++;
+//    TraceRay(
+//		SceneTLAS,
+//		RAY_FLAG_NONE,
+//		0xFF, 0, 0, 0, // Mask and offsets
+//		ray,
+//		payload);
 }
-
