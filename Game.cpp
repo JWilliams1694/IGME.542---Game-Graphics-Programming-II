@@ -36,13 +36,14 @@ void Game::Initialize()
 		Window::Height(),
 		FixPath(L"RayTracing.cso"));
 
-	maxShapes = 100;
+	maxShapes = 50;
 	lightCount = 32;
 	//CreateLights();
-	camera = std::make_shared<Camera>(XMFLOAT3(0, 0, -20), Window::AspectRatio(), XM_PIDIV4);
+	camera = std::make_shared<Camera>(XMFLOAT3(0, 5, -20), Window::AspectRatio(), XM_PIDIV4);
 
-	materials.push_back(std::make_shared<Material>(pipelineState, XMFLOAT3(0.5f, 0.5f, 0.5f), 1.0f));
+	materials.push_back(std::make_shared<Material>(pipelineState, XMFLOAT3(0.5f, 0.5f, 0.5f), 0.05f));
 	materials.push_back(std::make_shared<Material>(pipelineState, XMFLOAT3(1, 1, 1), 0.0f));
+	materials.push_back(std::make_shared<Material>(pipelineState, XMFLOAT3(1, 1, 1), -1.0f));
 	materials.push_back(std::make_shared<Material>(pipelineState, XMFLOAT3(1, 0, 0), 1.0f));
 
 	meshes.push_back(std::make_shared<Mesh>("Cube", FixPath(L"../../Assets/Meshes/cube.obj").c_str()));
@@ -81,40 +82,54 @@ Game::~Game()
 void Game::CreateGeometry()
 {
 	std::shared_ptr<GameEntity> floor = std::make_shared<GameEntity>(meshes[0], materials[0]);
-	floor->GetTransform()->SetScale(15, 15, 15);
+	floor->GetTransform()->SetScale(25, 15, 25);
 	floor->GetTransform()->SetPosition(0, -25, 0);
 	entities.push_back(floor);
 
-	std::shared_ptr<GameEntity> donut = std::make_shared<GameEntity>(meshes[1], materials[1]);
-	donut->GetTransform()->SetScale(2.5f, 2.5f, 2.5f);
-	donut->GetTransform()->SetPosition(-3, 3, 0);
-	entities.push_back(donut);
+	std::shared_ptr<GameEntity> reflectSphere = std::make_shared<GameEntity>(meshes[1], materials[1]);
+	reflectSphere->GetTransform()->SetScale(3.0f, 3.0f, 3.0f);
+	reflectSphere->GetTransform()->SetPosition(5, 2, 0);
+	entities.push_back(reflectSphere);
 
-	std::shared_ptr<GameEntity> helix = std::make_shared<GameEntity>(meshes[2], materials[2]);
+	std::shared_ptr<GameEntity> refractSphere = std::make_shared<GameEntity>(meshes[1], materials[2]);
+	refractSphere->GetTransform()->SetScale(3.0f, 3.0f, 3.0f);
+	refractSphere->GetTransform()->SetPosition(-5, 2, 0);
+	entities.push_back(refractSphere);
+
+	std::shared_ptr<GameEntity> helix = std::make_shared<GameEntity>(meshes[2], materials[3]);
 	helix->GetTransform()->SetScale(2.0f, 2.0f, 2.0f);
-	helix->GetTransform()->SetPosition(3, 0, 6);
+	helix->GetTransform()->SetPosition(5, 0, 10);
 	entities.push_back(helix);
 
-	std::shared_ptr<GameEntity> sphere = std::make_shared<GameEntity>(meshes[1], materials[1]);
-	sphere->GetTransform()->SetScale(2.5f, 2.5f, 2.5f);
-	sphere->GetTransform()->SetPosition(3, 2, 0);
-	entities.push_back(sphere);
+
 
 	for (int i = 0; i < maxShapes; i++)
 	{
-		std::shared_ptr<Material> mat = std::make_shared<Material>(pipelineState, XMFLOAT3(
+		std::shared_ptr<Material> reflectMat = std::make_shared<Material>(pipelineState, XMFLOAT3(
 			Random(0.0f, 1.0f),
 			Random(0.0f, 1.0f),
 			Random(0.0f, 1.0f)),
 			Random(0.0f, 1.0f));
 
-		float scale = Random(0.25f, 1.0f);
+		std::shared_ptr<Material> refractMat = std::make_shared<Material>(pipelineState, XMFLOAT3(
+			Random(0.0f, 1.0f),
+			Random(0.0f, 1.0f),
+			Random(0.0f, 1.0f)),
+			Random(-1.0f, 0.0f));
 
-		std::shared_ptr<GameEntity> shape = std::make_shared<GameEntity>(meshes[i % meshes.size()], mat);
-		shape->GetTransform()->SetScale(scale, scale, scale);
-		shape->GetTransform()->SetPosition(
-			Random(-10, 10), Random(-10, 10), Random(-10, 10));
-		entities.push_back(shape);
+		float scale = Random(0.25f, 1.5f);
+
+		std::shared_ptr<GameEntity> shape1 = std::make_shared<GameEntity>(meshes[i % meshes.size()], reflectMat);
+		shape1->GetTransform()->SetScale(scale, scale, scale);
+		shape1->GetTransform()->SetPosition(
+			Random(-20, 20), Random(-10, 10), Random(-20, 20));
+		entities.push_back(shape1);
+
+		std::shared_ptr<GameEntity> shape2 = std::make_shared<GameEntity>(meshes[i % meshes.size()], refractMat);
+		shape2->GetTransform()->SetScale(scale, scale, scale);
+		shape2->GetTransform()->SetPosition(
+			Random(-20, 20), Random(-10, 10), Random(-20, 20));
+		entities.push_back(shape2);
 	}
 }
 
@@ -195,12 +210,11 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
-
 	for (int i = 0; i < entities.size(); i++)
 	{
 		if (i != 0)
 		{
-			entities[i]->GetTransform()->Rotate(0.5f * deltaTime, deltaTime, 0);
+			entities[i]->GetTransform()->Rotate(0.5f * 0, deltaTime, 0);
 
 
 			// Calculate the new scale using a sine wave function with a time offset
