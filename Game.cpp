@@ -41,15 +41,16 @@ void Game::Initialize()
 	//CreateLights();
 	camera = std::make_shared<Camera>(XMFLOAT3(0, 0, -20), Window::AspectRatio(), XM_PIDIV4);
 
-	materials.push_back(std::make_shared<Material>(pipelineState, XMFLOAT3(0.5f, 0.5f, 0.5f), 0.2f));
+	materials.push_back(std::make_shared<Material>(pipelineState, XMFLOAT3(0.5f, 0.5f, 0.5f), 1.0f));
 	materials.push_back(std::make_shared<Material>(pipelineState, XMFLOAT3(1, 1, 1), 0.0f));
+	materials.push_back(std::make_shared<Material>(pipelineState, XMFLOAT3(1, 0, 0), 1.0f));
 
 	meshes.push_back(std::make_shared<Mesh>("Cube", FixPath(L"../../Assets/Meshes/cube.obj").c_str()));
 	meshes.push_back(std::make_shared<Mesh>("Sphere", FixPath(L"../../Assets/Meshes/sphere.obj").c_str()));
 	meshes.push_back(std::make_shared<Mesh>("Helix", FixPath(L"../../Assets/Meshes/helix.obj").c_str()));
 	meshes.push_back(std::make_shared<Mesh>("Torus", FixPath(L"../../Assets/Meshes/torus.obj").c_str()));
 	meshes.push_back(std::make_shared<Mesh>("Cylinder", FixPath(L"../../Assets/Meshes/cylinder.obj").c_str()));
-	meshes.push_back(std::make_shared<Mesh>("Quad", FixPath(L"../../Assets/Meshes/quad_double_sided.obj").c_str()));
+	//meshes.push_back(std::make_shared<Mesh>("Quad", FixPath(L"../../Assets/Meshes/quad_double_sided.obj").c_str()));
 
 	CreateGeometry();
 
@@ -84,10 +85,15 @@ void Game::CreateGeometry()
 	floor->GetTransform()->SetPosition(0, -25, 0);
 	entities.push_back(floor);
 
-	std::shared_ptr<GameEntity> donut = std::make_shared<GameEntity>(meshes[3], materials[1]);
+	std::shared_ptr<GameEntity> donut = std::make_shared<GameEntity>(meshes[1], materials[1]);
 	donut->GetTransform()->SetScale(2.5f, 2.5f, 2.5f);
 	donut->GetTransform()->SetPosition(-3, 3, 0);
 	entities.push_back(donut);
+
+	std::shared_ptr<GameEntity> helix = std::make_shared<GameEntity>(meshes[2], materials[2]);
+	helix->GetTransform()->SetScale(2.0f, 2.0f, 2.0f);
+	helix->GetTransform()->SetPosition(3, 0, 6);
+	entities.push_back(helix);
 
 	std::shared_ptr<GameEntity> sphere = std::make_shared<GameEntity>(meshes[1], materials[1]);
 	sphere->GetTransform()->SetScale(2.5f, 2.5f, 2.5f);

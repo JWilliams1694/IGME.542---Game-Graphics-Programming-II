@@ -251,97 +251,131 @@ void ClosestHit(inout RayPayload payload, BuiltInTriangleIntersectionAttributes 
     
 	// We've hit, so adjust the payload color by this instance's color
     payload.color *= entityColor[InstanceID()].rgb;
+    float materialType = entityColor[InstanceID()].a;
+    float3 albedo = entityColor[InstanceID()].rgb;
 
     Vertex hit = InterpolateVertices(PrimitiveIndex(), hitAttributes.barycentrics);
     float3 normal_WS = normalize(mul(hit.normal, (float3x3) ObjectToWorld4x3()));
 
     float2 uv = (float2) DispatchRaysIndex().xy / DispatchRaysDimensions().xy;
     float2 rng = rand2(uv * (payload.recursionDepth + 1) + payload.rayPerPixelIndex + RayTCurrent());
+    float3 incident = normalize(WorldRayDirection());
 
-    bool frontFace = dot(WorldRayDirection(), normal_WS) < 0;
+    //float3 albedo = entityColor[InstanceID()].rgb;
+    float roughness = entityColor[InstanceID()].a; // Roughness stored in alpha channel
+    bool isRefractive = roughness < 0.5f;
+
+    bool frontFace = dot(incident, normal_WS) < 0;
+    float3 normal = frontFace ? normal_WS : -normal_WS; // Flip normal if hitting from inside
+
+    //bool frontFace = dot(WorldRayDirection(), normal_WS) < 0;
+    float refractionIndex = 1.5;
+    float ri = frontFace ? (1.0 / refractionIndex) : refractionIndex;
+    float3 direction;
+
+    float cos_theta = min(dot(-incident, normal_WS), 1.0f);
+    float sin_theta = sqrt(1.0f - cos_theta * cos_theta);
     
     // Determine if the material is reflective or refractive
-    bool isRefractive = entityColor[InstanceID()].a > 0.5f; 
-    if (isRefractive)
+    //bool isRefractive = entityColor[InstanceID()].a > 0.5f;
+    //bool cannot_refract = ri * sin_theta > 1.0;
+    RayDesc ray;
+    ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
+    ray.TMin = 0.0001f;
+    ray.TMax = 1000.0f;
+    
+    payload.recursionDepth++;
+
+    if (!isRefractive) // Metal (Reflective)
     {
-        // Refractive material
-        float3 incident = WorldRayDirection();
-        float3 refracted;
-        float ri =frontFace;
-        float direction;
+        float3 perfectReflection = reflect(incident, normal);
+        float3 randomBounce = RandomCosineWeightedHemisphere(rand(rng), rand(rng.yx), normal);
+        float3 direction = normalize(lerp(perfectReflection, randomBounce, roughness)); // Interpolated
 
-        float cos_theta = min(dot(-incident, normal_WS), 1.0f);
-        float sin_theta = sqrt(1.0f - cos_theta * cos_theta);
+        ray.Direction = direction;
+        payload.color *= albedo;
+    }
+    else // Dielectric (Refractive)
+    {
+        float refractionIndex = 1.5;
+        float ri = frontFace ? (1.0 / refractionIndex) : refractionIndex;
 
-        // Determine if refraction is possible
-        bool cannot_refract = ri * sin_theta > 1.0f;
+        float cosTheta = min(dot(-incident, normal), 1.0f);
+        float sinTheta = sqrt(1.0f - cosTheta * cosTheta);
 
-        if (cannot_refract)
+        // Calculate refraction direction
+        float3 refractionDirection = refract(incident, normal, ri);
+        bool totalInternalReflection = length(refractionDirection) == 0; // Check if refract() failed
+
+        // Schlick’s approximation for reflectance probability
+        float schlickReflectance = pow(1.0f - cosTheta, 5.0f);
+
+        if (totalInternalReflection || rand(rng) < schlickReflectance)
         {
-            // Total internal reflection
-            direction = reflect(incident, normal_WS);
+            // Use reflection if total internal reflection occurs
+            ray.Direction = reflect(incident, normal);
         }
         else
         {
-            // Refraction
-            direction = refract(incident, normal_WS, ri);
+            // Otherwise, use refraction
+            ray.Direction = normalize(refractionDirection);
         }
 
-     
-        
-        RayDesc ray;
-        ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
-        ray.Direction = refracted;
-        ray.TMin = 0.0001f;
-        ray.TMax = 1000.0f;
-
-        // Recursive ray trace
-        payload.recursionDepth++;
-        TraceRay(
-            SceneTLAS,
-            RAY_FLAG_NONE,
-            0xFF, 0, 0, 0, // Mask and offsets
-            ray,
-            payload);
+        payload.color *= albedo;
     }
-    else
-    {
-        // Reflective material
-        float3 refl = reflect(WorldRayDirection(), normal_WS);
-        float3 randomBounce = RandomCosineWeightedHemisphere(rand(rng), rand(rng.yx), normal_WS);
-        float3 dir = normalize(lerp(refl, randomBounce, entityColor[InstanceID()].a));
 
-        RayDesc ray;
-        ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
-        ray.Direction = dir;
-        ray.TMin = 0.0001f;
-        ray.TMax = 1000.0f;
-
-        // Recursive ray trace
-        payload.recursionDepth++;
-        TraceRay(
-            SceneTLAS,
-            RAY_FLAG_NONE,
-            0xFF, 0, 0, 0, // Mask and offsets
-            ray,
-            payload);
-    }
-//    float3 refl = reflect(WorldRayDirection(), normal_WS);
-//    float3 randomBounce = RandomCosineWeightedHemisphere(rand(rng), rand(rng.yx), normal_WS);
-//    float3 dir = normalize(lerp(refl, randomBounce, entityColor[InstanceID()].a));
-//	
-//    RayDesc ray;
-//    ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
-//    ray.Direction = dir;
-//    ray.TMin = 0.0001f;
-//    ray.TMax = 1000.0f;
-//
-//	// Recursive ray trace
-//    payload.recursionDepth++;
-//    TraceRay(
-//		SceneTLAS,
-//		RAY_FLAG_NONE,
-//		0xFF, 0, 0, 0, // Mask and offsets
-//		ray,
-//		payload);
+    // Recursive trace
+    TraceRay(
+        SceneTLAS,
+        RAY_FLAG_NONE,
+        0xFF, 0, 0, 0,
+        ray,
+        payload);
+    //payload.color = float3(isRefractive, isRefractive, isRefractive);
+    //return;
+    //if (!isRefractive)
+    //{
+    //    // Reflective material
+    //    float3 refl = reflect(WorldRayDirection(), normal_WS);
+    //    float3 randomBounce = RandomCosineWeightedHemisphere(rand(rng), rand(rng.yx), normal_WS);
+    //    float3 dir = normalize(lerp(refl, randomBounce, entityColor[InstanceID()].a));
+    //
+    //    RayDesc ray;
+    //    ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
+    //    ray.Direction = dir;
+    //    ray.TMin = 0.0001f;
+    //    ray.TMax = 1000.0f;
+    //
+    //    // Recursive ray trace
+    //    payload.recursionDepth++;
+    //    TraceRay(
+    //        SceneTLAS,
+    //        RAY_FLAG_NONE,
+    //        0xFF, 0, 0, 0, // Mask and offsets
+    //        ray,
+    //        payload);
+    //}
+    //else
+    //{
+    //     // Refractive material
+    //    float3 refracted;
+    //
+    //    // Refraction
+    //    direction = refract(incident, -normal_WS, ri);
+    //
+    //    RayDesc ray;
+    //    ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
+    //    ray.Direction = direction;
+    //    ray.TMin = 0.0001f;
+    //    ray.TMax = 1000.0f;
+    //
+    //    // Recursive ray trace
+    //    payload.recursionDepth++;
+    //    TraceRay(
+    //        SceneTLAS,
+    //        RAY_FLAG_NONE,
+    //        0xFF, 0, 0, 0, // Mask and offsets
+    //        ray,
+    //        payload);
+    //}
 }
