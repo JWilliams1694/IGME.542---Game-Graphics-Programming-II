@@ -1,0 +1,25 @@
+#include "ShaderIncludes.hlsli"
+
+cbuffer DataFromCPU : register(b0)
+{
+    matrix viewMatrix;
+    matrix projectionMatrix;
+}
+
+
+VertexToPixel_Sky main(VertexShaderInput input)
+{
+    VertexToPixel_Sky output;
+    
+    matrix viewNoTranslation = viewMatrix;
+    viewNoTranslation._14 = 0;
+    viewNoTranslation._24 = 0;
+    viewNoTranslation._34 = 0;
+
+    matrix vp = mul(projectionMatrix, viewNoTranslation);
+    output.screenPosition = mul(vp, float4(input.localPosition, 1.0f));
+    output.screenPosition.z = output.screenPosition.w;
+    output.sampleDir = input.localPosition;   
+    
+    return output;
+}
