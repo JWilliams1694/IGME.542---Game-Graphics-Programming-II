@@ -22,8 +22,17 @@ private:
 	//particle properties
 	int maxParticles; // Maximum number of particles
 	Particle* particles; // All possible particles
-	int livingParticles; //amount of current particles
+	int livingParticles; // The amount of currently living particles
 
-	//
+	//emission properties
+	int maxLifetime; // The max lifetime of particles
+	int emitRate; // How many particles to emit each second
+	float emitTimer; // How many (fractional) seconds between each particle emission
+	float lastEmit; // How long has it been since the last emit
+
+	//rendering properties
+	Microsoft::WRL::ComPtr<ID3D11Buffer> particleDataBuffer;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> particleDataSRV;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 };
 
