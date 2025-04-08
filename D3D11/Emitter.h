@@ -17,12 +17,18 @@ class Emitter
 public:
 	Emitter();
 
+	void Update(float dt, float currentTime);
+	void Draw();
+	void CreateParticleBuffer();
+	void CopyToGPU();
 
 private:
 	//particle properties
 	int maxParticles; // Maximum number of particles
 	Particle* particles; // All possible particles
 	int livingParticles; // The amount of currently living particles
+	int indexFirstDead;
+	int indexFirstAlive;
 
 	//emission properties
 	int maxLifetime; // The max lifetime of particles
