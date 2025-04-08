@@ -15,10 +15,14 @@ struct Particle
 // Buffer of particle data
 StructuredBuffer<Particle> ParticleData : register(t0);
 
-float4 main(float4 pos : POSITION) : SV_POSITION
+VertexToPixel main(uint id : SV_VertexID)
 {
-    // Grab one particle and calculate its age
-    Particle p = ParticleData.Load(particleID);
+    VertexToPixel output;
+
+    uint particleID = id / 4; // Every group of 4 verts are ONE particle! (int division)
+    uint cornerID = id % 4; // 0,1,2,3 = which corner of the particle’s "quad"
+    Particle p = ParticleData.Load(particleID); // Each vertex gets associated particle!
+
     float age = currentTime - p.EmitTime; // currentTime is from C++
     
     return pos;
