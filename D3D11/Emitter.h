@@ -19,8 +19,7 @@ public:
 
 	void Update(float dt, float currentTime);
 	void Draw();
-	void CreateParticleBuffer();
-	void CopyToGPU();
+	
 
 private:
 	//particle properties
@@ -40,5 +39,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> particleDataBuffer;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> particleDataSRV;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
+
+
+	void CreateParticleBuffer();
+	void CopyToGPU();
+	void EmitParticle(float currentTime);
 };
 

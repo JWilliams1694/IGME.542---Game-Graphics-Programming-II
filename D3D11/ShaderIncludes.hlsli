@@ -90,6 +90,12 @@ struct VertexToPixel_Sky
     float3 sampleDir : DIRECTION;
 };
 
+struct VertexToPixel_Particle
+{
+    float4 screenPosition : SV_POSITION;
+    float2 uv : TEXCOORD;
+    float4 color : COLOR;
+};
 
 // A constant Fresnel value for non-metals (glass and plastic have values of about 0.04)
 static const float F0_NON_METAL = 0.04f;

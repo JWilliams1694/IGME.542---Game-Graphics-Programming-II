@@ -4,16 +4,28 @@
 void Emitter::Update(float dt, float currentTime)
 {
 	lastEmit += dt;
-	while (lastEmit > secondsPerParticle)
+	while (lastEmit > emitTimer)
 	{
 		EmitParticle(currentTime);
-		lastEmit -= secondsPerParticle;
+		lastEmit -= emitTimer;
 	}
 
 }
 
 void Emitter::CreateParticleBuffer()
 {
+	unsigned int* indices = new unsigned int[maxParticles * 6];
+	int indexCount = 0;
+	for (int i = 0; i < maxParticles * 4; i += 4)
+	{
+		indices[indexCount++] = i;
+		indices[indexCount++] = i + 1;
+		indices[indexCount++] = i + 2;
+		indices[indexCount++] = i;
+		indices[indexCount++] = i + 2;
+		indices[indexCount++] = i + 3;
+	}
+
 	// Make a dynamic buffer to hold all particle data on GPU
 		// Note: We'll be overwriting this every frame with new lifetime data
 	D3D11_BUFFER_DESC desc = {};
@@ -38,8 +50,8 @@ void Emitter::CreateParticleBuffer()
 void Emitter::CopyToGPU()
 {
 	// Map the buffer, locking it on the GPU so we can write to it
-		D3D11_MAPPED_SUBRESOURCE mapped = {};
-		Graphics::Context->Map(particleDataBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+	D3D11_MAPPED_SUBRESOURCE mapped = {};
+	Graphics::Context->Map(particleDataBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
 	// How are living particles arranged in the buffer?
 	if (indexFirstAlive < indexFirstDead)
 	{
@@ -64,4 +76,9 @@ void Emitter::CopyToGPU()
 	}
 	// Unmap (unlock) now that we're done with it
 	Graphics::Context->Unmap(particleDataBuffer.Get(), 0);
+}
+
+void Emitter::EmitParticle(float currentTime)
+{
+
 }
