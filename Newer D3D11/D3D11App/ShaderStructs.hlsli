@@ -32,5 +32,11 @@ struct VertexToPixel_Sky
 	float3 sampleDir		: DIRECTION;
 };
 
-
+// VStoPS struct for particles
+struct VertexToPixel_Particle
+{
+    float4 screenPosition : SV_POSITION;
+    float2 uv : TEXCOORD;
+    float4 color : COLOR;
+};
 #endif

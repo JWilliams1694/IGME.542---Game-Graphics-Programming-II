@@ -166,6 +166,8 @@ void Game::LoadAssetsAndCreateEntities()
 	solidColorPS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"SolidColorPS.cso").c_str());
 	std::shared_ptr<SimpleVertexShader> skyVS = std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"SkyVS.cso").c_str());
 	std::shared_ptr<SimplePixelShader> skyPS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"SkyPS.cso").c_str());
+	std::shared_ptr<SimpleVertexShader> particleVS = std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"ParticleVS.cso").c_str());
+	std::shared_ptr<SimplePixelShader> particlePS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"ParticlePS.cso").c_str());
 
 	// Load 3D models	
 	std::shared_ptr<Mesh> cubeMesh = std::make_shared<Mesh>("Cube", FixPath(AssetPath + L"Meshes/cube.obj").c_str());
@@ -353,6 +355,8 @@ void Game::LoadAssetsAndCreateEntities()
 		geMetal->GetTransform()->SetPosition(i * 2.0f - 10.0f, 1, 0);
 		geNonMetal->GetTransform()->SetPosition(i * 2.0f - 10.0f, -1, 0);
 	}
+
+	//create emitters
 }
 
 // --------------------------------------------------------

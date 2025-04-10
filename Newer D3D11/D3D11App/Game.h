@@ -12,6 +12,7 @@
 #include "SimpleShader.h"
 #include "Lights.h"
 #include "Sky.h"
+#include "Emitter.h"
 
 class Game
 {
@@ -67,5 +68,8 @@ private:
 	// Shaders for solid color spheres
 	std::shared_ptr<SimplePixelShader> solidColorPS;
 	std::shared_ptr<SimpleVertexShader> vertexShader;
+
+	//particles
+	std::vector<std::shared_ptr<Emitter>> emitters;
 };
 
