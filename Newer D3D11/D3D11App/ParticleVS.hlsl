@@ -1,3 +1,13 @@
+struct Particle
+{
+    float EmitTime;
+    float3 StartPos;
+    float3 StartVelocity;
+    float StartRotation;
+    float EndRotation;
+    float3 padding;
+}; 
+
 cbuffer externalData : register(b0)
 {
     matrix view;
@@ -5,13 +15,6 @@ cbuffer externalData : register(b0)
     float currentTime;
     Particle particles[MAX_PARTICLES];
 };
-
-struct Particle
-{
-    float EmitTime;
-    float3 StartPos;
-};
-
 
 struct VertexToPixel
 {
@@ -57,5 +60,5 @@ VertexToPixel main(uint id : SV_VertexID)
     output.uv = uvs[cornerID];
 
 
-    return pos;
+    return output;
 }
