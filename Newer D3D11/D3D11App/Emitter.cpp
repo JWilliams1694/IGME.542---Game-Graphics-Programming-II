@@ -1,6 +1,37 @@
 #include "Emitter.h"
 #include "Graphics.h"
 
+Emitter::Emitter(int maxParticles,
+	int particlesPerSec,
+	int maxLifetime,
+	float startSize,
+	float endSize,
+	DirectX::XMFLOAT4 startColor,
+	DirectX::XMFLOAT4 endColor,
+	DirectX::XMFLOAT3 startVelocity,
+	DirectX::XMFLOAT3 emitterPosition,
+	std::shared_ptr<Material> material) :
+	maxParticles(maxParticles),
+	particlesPerSec(particlesPerSec),
+	maxLifetime(maxLifetime),
+	startSize(startSize),
+	endSize(endSize),
+	startColor(startColor),
+	endColor(endColor),
+	startVelocity(startVelocity),
+	material(material)
+{
+	transform = std::make_shared<Transform>();
+	transform->SetPosition(emitterPosition);
+
+	CreateParticleBuffer();
+}
+
+Emitter::~Emitter()
+{
+	delete[] particles;
+}
+
 void Emitter::Update(float dt, float currentTime)
 {
 	lastEmit += dt;
@@ -10,6 +41,10 @@ void Emitter::Update(float dt, float currentTime)
 		lastEmit -= emitTimer;
 	}
 
+}
+
+void Emitter::Draw(std::shared_ptr<Camera> camera, float currentTime)
+{
 }
 
 void Emitter::CreateParticleBuffer()
@@ -80,5 +115,14 @@ void Emitter::CopyToGPU()
 
 void Emitter::EmitParticle(float currentTime)
 {
+	if (livingParticles >= maxParticles)
+	{
+		return;
+	}
+
+	int index = indexFirstDead;
+
+	particles[index].EmitTime = currentTime;
+
 
 }

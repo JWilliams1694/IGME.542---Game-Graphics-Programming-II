@@ -14,10 +14,10 @@ class Material
 {
 public:
 	Material(
-		const char* name, 
+		const char* name,
 		std::shared_ptr<SimplePixelShader> ps,
 		std::shared_ptr<SimpleVertexShader> vs,
-		DirectX::XMFLOAT3 tint, 
+		DirectX::XMFLOAT3 tint,
 		DirectX::XMFLOAT2 uvScale = DirectX::XMFLOAT2(1, 1),
 		DirectX::XMFLOAT2 uvOffset = DirectX::XMFLOAT2(0, 0));
 
@@ -65,4 +65,3 @@ private:
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> textureSRVs;
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11SamplerState>> samplers;
 };
-

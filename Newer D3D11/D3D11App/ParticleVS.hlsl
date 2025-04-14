@@ -6,14 +6,17 @@ struct Particle
     float StartRotation;
     float EndRotation;
     float3 padding;
-}; 
+};
 
 cbuffer externalData : register(b0)
 {
     matrix view;
     matrix projection;
     float currentTime;
-    Particle particles[MAX_PARTICLES];
+    float3 accel;
+    float startSize;
+    float endSize;
+    float lifetime;
 };
 
 struct VertexToPixel
@@ -37,7 +40,7 @@ VertexToPixel main(uint id : SV_VertexID)
     float age = currentTime - p.EmitTime; // currentTime is from C++
 
     //Offset from current position based on age
-    float3 pos = acceleration * age * age / 2.0f + p.StartVelocity * age + p.StartPosition;
+    float3 pos = accel * age * age / 2.0f + p.StartVelocity * age + p.StartPos;
 
     // Offsets for the 4 corners of a quad - we'll only use one for each
 // vertex, but which one depends on the cornerID

@@ -6,6 +6,7 @@
 #include "SimpleShader.h"
 #include "Camera.h"
 #include "Transform.h"
+#include "Material.h"
 struct Particle
 {
 	float EmitTime;
@@ -19,11 +20,29 @@ struct Particle
 class Emitter
 {
 public:
-	Emitter();
+	Emitter(int maxParticles,
+		int particlesPerSec,
+		int maxLifetime,
+		float startSize,
+		float endSize,
+		DirectX::XMFLOAT4 startColor,
+		DirectX::XMFLOAT4 endColor,
+		DirectX::XMFLOAT3 startVelocity,
+		DirectX::XMFLOAT3 emitterPosition,
+		std::shared_ptr<Material> material);
+	~Emitter();
 
+	//methods
 	void Update(float dt, float currentTime);
-	void Draw();
+	void Draw(std::shared_ptr<Camera> camera, float currentTime);
 
+	//variables
+	DirectX::XMFLOAT4 startColor;
+	DirectX::XMFLOAT4 endColor;
+	DirectX::XMFLOAT3 startVelocity;
+	DirectX::XMFLOAT3 emitterAcceleration;
+	float startSize;
+	float endSize;
 
 private:
 	//particle properties
@@ -33,9 +52,10 @@ private:
 	int indexFirstDead;
 	int indexFirstAlive;
 
+
 	//emission properties
 	int maxLifetime; // The max lifetime of particles
-	int emitRate; // How many particles to emit each second
+	int particlesPerSec; // How many particles to emit each second
 	float emitTimer; // How many (fractional) seconds between each particle emission
 	float lastEmit; // How long has it been since the last emit
 
@@ -44,9 +64,12 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> particleDataSRV;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 
-
+	//methods
 	void CreateParticleBuffer();
 	void CopyToGPU();
 	void EmitParticle(float currentTime);
+
+	std::shared_ptr<Transform> transform;
+	std::shared_ptr<Material> material;
 };
 
