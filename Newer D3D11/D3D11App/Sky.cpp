@@ -25,7 +25,7 @@ Sky::Sky(
 
 // Constructor that loads a DDS cube map file
 Sky::Sky(
-	const wchar_t* cubemapDDSFile, 
+	const wchar_t* cubemapDDSFile,
 	std::shared_ptr<Mesh> mesh,
 	std::shared_ptr<SimpleVertexShader> skyVS,
 	std::shared_ptr<SimplePixelShader> skyPS,
@@ -45,12 +45,12 @@ Sky::Sky(
 
 // Constructor that loads 6 textures and makes a cube map
 Sky::Sky(
-	const wchar_t* right, 
-	const wchar_t* left, 
-	const wchar_t* up, 
-	const wchar_t* down, 
-	const wchar_t* front, 
-	const wchar_t* back, 
+	const wchar_t* right,
+	const wchar_t* left,
+	const wchar_t* up,
+	const wchar_t* down,
+	const wchar_t* front,
+	const wchar_t* back,
 	std::shared_ptr<Mesh> mesh,
 	std::shared_ptr<SimpleVertexShader> skyVS,
 	std::shared_ptr<SimplePixelShader> skyPS,

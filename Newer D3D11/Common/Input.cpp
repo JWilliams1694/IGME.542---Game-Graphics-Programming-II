@@ -73,7 +73,7 @@
 namespace Input
 {
 	// Annonymous namespace to hold variables only accessible in this file
-	namespace 
+	namespace
 	{
 		// Arrays for the current and previous key states
 		unsigned char* kbState = 0;

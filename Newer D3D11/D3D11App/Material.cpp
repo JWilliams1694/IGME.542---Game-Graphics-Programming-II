@@ -1,7 +1,7 @@
 #include "Material.h"
 
 Material::Material(
-	const char* name, 
+	const char* name,
 	std::shared_ptr<SimplePixelShader> ps,
 	std::shared_ptr<SimpleVertexShader> vs,
 	DirectX::XMFLOAT3 tint,

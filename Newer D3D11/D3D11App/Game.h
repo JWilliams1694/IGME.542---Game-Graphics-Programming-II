@@ -56,7 +56,7 @@ private:
 	std::vector<std::shared_ptr<GameEntity>> entitiesGradient;
 	std::vector<std::shared_ptr<GameEntity>>* currentScene;
 	std::vector<Light> lights;
-	
+
 	// Overall lighting options
 	DemoLightingOptions lightOptions;
 	std::shared_ptr<Mesh> pointLightMesh;

@@ -232,7 +232,7 @@ Mesh::Mesh(const char* name, const std::wstring& objFile) :
 // --------------------------------------------------------
 // Destructor doesn't have much to do since we're using ComPtrs
 // --------------------------------------------------------
-Mesh::~Mesh() { }
+Mesh::~Mesh() {}
 
 
 // --------------------------------------------------------

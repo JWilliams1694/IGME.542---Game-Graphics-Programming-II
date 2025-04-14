@@ -11,7 +11,7 @@ Camera::Camera(
 	float nearClip,
 	float farClip,
 	CameraProjectionType projType) :
-	fieldOfView(fieldOfView), 
+	fieldOfView(fieldOfView),
 	aspectRatio(aspectRatio),
 	nearClip(nearClip),
 	farClip(farClip),
@@ -27,7 +27,8 @@ Camera::Camera(
 
 // Nothing to really do
 Camera::~Camera()
-{ }
+{
+}
 
 
 // Camera's update, which simply updates the view matrix
@@ -87,22 +88,22 @@ std::shared_ptr<Transform> Camera::GetTransform() { return transform; }
 float Camera::GetAspectRatio() { return aspectRatio; }
 
 float Camera::GetFieldOfView() { return fieldOfView; }
-void Camera::SetFieldOfView(float fov) 
-{ 
-	fieldOfView = fov; 
+void Camera::SetFieldOfView(float fov)
+{
+	fieldOfView = fov;
 	UpdateProjectionMatrix(aspectRatio);
 }
 
 float Camera::GetNearClip() { return nearClip; }
-void Camera::SetNearClip(float distance) 
-{ 
+void Camera::SetNearClip(float distance)
+{
 	nearClip = distance;
 	UpdateProjectionMatrix(aspectRatio);
 }
 
 float Camera::GetFarClip() { return farClip; }
-void Camera::SetFarClip(float distance) 
-{ 
+void Camera::SetFarClip(float distance)
+{
 	farClip = distance;
 	UpdateProjectionMatrix(aspectRatio);
 }
@@ -115,11 +116,11 @@ void Camera::SetOrthographicWidth(float width)
 }
 
 CameraProjectionType Camera::GetProjectionType() { return projectionType; }
-void Camera::SetProjectionType(CameraProjectionType type) 
+void Camera::SetProjectionType(CameraProjectionType type)
 {
 	projectionType = type;
 	UpdateProjectionMatrix(aspectRatio);
-} 
+}
 
 
 

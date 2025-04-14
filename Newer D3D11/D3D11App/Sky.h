@@ -22,7 +22,7 @@ public:
 
 	// Constructor that loads a DDS cube map file
 	Sky(
-		const wchar_t* cubemapDDSFile, 
+		const wchar_t* cubemapDDSFile,
 		std::shared_ptr<Mesh> mesh,
 		std::shared_ptr<SimpleVertexShader> skyVS,
 		std::shared_ptr<SimplePixelShader> skyPS,
@@ -65,7 +65,7 @@ private:
 	// Skybox related resources
 	std::shared_ptr<SimpleVertexShader> skyVS;
 	std::shared_ptr<SimplePixelShader> skyPS;
-	
+
 	std::shared_ptr<Mesh> skyMesh;
 
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> skyRasterState;

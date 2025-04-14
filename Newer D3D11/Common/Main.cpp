@@ -24,7 +24,7 @@ namespace
 		// Let the game object know
 		// that the window has been
 		// resized, if it exists
-		if(game)
+		if (game)
 			game->OnResize();
 	}
 }
@@ -73,8 +73,8 @@ int WINAPI WinMain(
 
 	// Initialize the graphics API and verify
 	HRESULT graphicsResult = Graphics::Initialize(
-		Window::Width(), 
-		Window::Height(), 
+		Window::Width(),
+		Window::Height(),
 		Window::Handle(),
 		vsync);
 	if (FAILED(graphicsResult))

@@ -400,7 +400,7 @@ DirectX::XMFLOAT3 Transform::QuaternionToEuler(DirectX::XMFLOAT4 quaternion)
 	// Convert quaternion to euler angles
 	// Note: This will give a set of euler angles, but not necessarily
 	// the same angles that were used to create the quaternion
-	
+
 	// Step 1: Quaternion to rotation matrix
 	XMMATRIX rMat = XMMatrixRotationQuaternion(XMLoadFloat4(&quaternion));
 

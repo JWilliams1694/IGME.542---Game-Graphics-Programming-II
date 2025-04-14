@@ -27,8 +27,8 @@ namespace Graphics
 
 // Getters
 bool Graphics::VsyncState() { return vsyncDesired || !supportsTearing || isFullscreen; }
-std::wstring Graphics::APIName() 
-{ 
+std::wstring Graphics::APIName()
+{
 	switch (featureLevel)
 	{
 	case D3D_FEATURE_LEVEL_10_0: return L"D3D10";
@@ -87,21 +87,21 @@ HRESULT Graphics::Initialize(unsigned int windowWidth, unsigned int windowHeight
 	// Create a description of how our swap
 	// chain should work
 	DXGI_SWAP_CHAIN_DESC swapDesc = {};
-	swapDesc.BufferCount		= 2;
-	swapDesc.BufferDesc.Width	= windowWidth;
-	swapDesc.BufferDesc.Height	= windowHeight;
+	swapDesc.BufferCount = 2;
+	swapDesc.BufferDesc.Width = windowWidth;
+	swapDesc.BufferDesc.Height = windowHeight;
 	swapDesc.BufferDesc.RefreshRate.Numerator = 60;
 	swapDesc.BufferDesc.RefreshRate.Denominator = 1;
-	swapDesc.BufferDesc.Format	= DXGI_FORMAT_R8G8B8A8_UNORM;
+	swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	swapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-	swapDesc.BufferUsage		= DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapDesc.Flags				= supportsTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
-	swapDesc.OutputWindow		= windowHandle;
-	swapDesc.SampleDesc.Count	= 1;
+	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapDesc.Flags = supportsTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
+	swapDesc.OutputWindow = windowHandle;
+	swapDesc.SampleDesc.Count = 1;
 	swapDesc.SampleDesc.Quality = 0;
-	swapDesc.SwapEffect			= DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapDesc.Windowed			= true;
+	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	swapDesc.Windowed = true;
 
 	// Result variable for below function calls
 	HRESULT hr = S_OK;
@@ -177,10 +177,10 @@ void Graphics::ResizeBuffers(unsigned int width, unsigned int height)
 
 	// Resize the swap chain buffers
 	SwapChain->ResizeBuffers(
-		2, 
-		width, 
-		height, 
-		DXGI_FORMAT_R8G8B8A8_UNORM, 
+		2,
+		width,
+		height,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
 		supportsTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0);
 
 	// Grab the references to the first buffer
@@ -218,7 +218,7 @@ void Graphics::ResizeBuffers(unsigned int width, unsigned int height)
 	Device->CreateDepthStencilView(
 		depthBufferTexture.Get(),
 		0,
-		DepthBufferDSV.GetAddressOf()); 
+		DepthBufferDSV.GetAddressOf());
 
 	// Bind the views to the pipeline, so rendering properly 
 	// uses their underlying textures
@@ -267,7 +267,7 @@ void Graphics::PrintDebugMessages()
 		// Reserve space for this message
 		D3D11_MESSAGE* message = (D3D11_MESSAGE*)malloc(messageSize);
 		InfoQueue->GetMessage(i, message, &messageSize);
-		
+
 		// Print and clean up memory
 		if (message)
 		{

@@ -57,7 +57,7 @@ private:
 	// Hierarchy
 	Transform* parent;
 	std::vector<Transform*> children;
-	
+
 	// Raw transformation data
 	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT3 pitchYawRoll;

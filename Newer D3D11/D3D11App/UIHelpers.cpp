@@ -233,7 +233,7 @@ void BuildUI(
 		if (ImGui::TreeNode("Lights"))
 		{
 			// Light details
-			ImGui::Spacing();	
+			ImGui::Spacing();
 			ImGui::ColorEdit3("Ambient Color", &lightOptions.AmbientColor.x);
 			ImGui::Checkbox("Show Point Lights", &lightOptions.DrawLights);
 			ImGui::Checkbox("Freeze Lights", &lightOptions.FreezeLightMovement);

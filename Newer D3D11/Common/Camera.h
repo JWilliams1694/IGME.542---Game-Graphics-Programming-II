@@ -15,10 +15,10 @@ class Camera
 public:
 	Camera(
 		DirectX::XMFLOAT3 position,
-		float fieldOfView, 
-		float aspectRatio, 
-		float nearClip = 0.01f, 
-		float farClip = 100.0f, 
+		float fieldOfView,
+		float aspectRatio,
+		float nearClip = 0.01f,
+		float farClip = 100.0f,
 		CameraProjectionType projType = CameraProjectionType::Perspective);
 
 	~Camera();
@@ -36,7 +36,7 @@ public:
 
 	float GetFieldOfView();
 	void SetFieldOfView(float fov);
-	
+
 	float GetNearClip();
 	void SetNearClip(float distance);
 
