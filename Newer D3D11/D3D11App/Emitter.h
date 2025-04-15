@@ -22,19 +22,32 @@ class Emitter
 public:
 	Emitter(int maxParticles,
 		int particlesPerSec,
-		int maxLifetime,
+		float maxLifetime,
 		float startSize,
 		float endSize,
 		DirectX::XMFLOAT4 startColor,
 		DirectX::XMFLOAT4 endColor,
 		DirectX::XMFLOAT3 startVelocity,
 		DirectX::XMFLOAT3 emitterPosition,
+		DirectX::XMFLOAT3 emitterAcceleration,
 		std::shared_ptr<Material> material);
 	~Emitter();
 
 	//methods
 	void Update(float dt, float currentTime);
 	void Draw(std::shared_ptr<Camera> camera, float currentTime);
+
+	//getters & setters
+	std::shared_ptr<Transform> GetTransform();
+
+	std::shared_ptr<Material> GetMaterial();
+	void SetMaterial(std::shared_ptr<Material> material);
+	
+	int GetParticlesPerSec();
+	void SetParticlesPerSec(int particlesPerSec);
+
+	int GetMaxParticles();
+	void SetMaxParticles(int maxParticles);
 
 	//variables
 	DirectX::XMFLOAT4 startColor;
@@ -54,9 +67,10 @@ private:
 
 
 	//emission properties
-	int maxLifetime; // The max lifetime of particles
+	float maxLifetime; // The max lifetime of particles
 	int particlesPerSec; // How many particles to emit each second
-	float emitTimer; // How many (fractional) seconds between each particle emission
+	float secondsPerParticle; // How many seconds between each particle emission
+	float totalEmitTime; // How many (fractional) seconds between each particle emission
 	float lastEmit; // How long has it been since the last emit
 
 	//rendering properties
@@ -68,6 +82,7 @@ private:
 	void CreateParticleBuffer();
 	void CopyToGPU();
 	void EmitParticle(float currentTime);
+	void CheckSingleParticle(float currentTime, int i);
 
 	std::shared_ptr<Transform> transform;
 	std::shared_ptr<Material> material;

@@ -17,6 +17,8 @@ cbuffer externalData : register(b0)
     float startSize;
     float endSize;
     float lifetime;
+    float4 startColor;
+    float4 endColor;
 };
 
 struct VertexToPixel
@@ -38,9 +40,13 @@ VertexToPixel main(uint id : SV_VertexID)
     Particle p = ParticleData.Load(particleID); // Each vertex gets associated particle!
 
     float age = currentTime - p.EmitTime; // currentTime is from C++
+    float agePercent = age / lifetime;
 
     //Offset from current position based on age
     float3 pos = accel * age * age / 2.0f + p.StartVelocity * age + p.StartPos;
+
+    //calculate size
+    float size = lerp(startSize, endSize, agePercent);
 
     // Offsets for the 4 corners of a quad - we'll only use one for each
 // vertex, but which one depends on the cornerID
@@ -50,18 +56,31 @@ VertexToPixel main(uint id : SV_VertexID)
     offsets[2] = float2(+1.0f, -1.0f); // BR
     offsets[3] = float2(-1.0f, -1.0f); // BL
 
+    //rotation stuff
+    float s, c, rotation = lerp(p.StartRotation, p.EndRotation, agePercent);
+    sincos(rotation, s, c); 
+    float2x2 rot =
+    {
+        c, s,
+		-s, c
+    };
+    float2 rotatedOffset = mul(offsets[cornerID], rot) * size;
+
     // Billboarding!
 // Offset the position based on the camera's right and up vectors
     pos += float3(view._11, view._12, view._13) * offsets[cornerID].x; // RIGHT
     pos += float3(view._21, view._22, view._23) * offsets[cornerID].y; // UP
 
+    matrix viewProj = mul(projection, view);
+    output.position = mul(viewProj, float4(pos, 1.0f));
+    
     float2 uvs[4];
     uvs[0] = float2(0, 0); // TL
     uvs[1] = float2(1, 0); // TR
     uvs[2] = float2(1, 1); // BR
     uvs[3] = float2(0, 1); // BL
     output.uv = uvs[cornerID];
-
+    output.colorTint = lerp(startColor, endColor, agePercent);
 
     return output;
 }

@@ -120,6 +120,10 @@ void Game::LoadAssetsAndCreateEntities()
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughA, roughN, roughR, roughM;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodA, woodN, woodR, woodM;
 
+	//load particles
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> fire, twirl, star, flame_animated;
+
+
 	// Quick pre-processor macro for simplifying texture loading calls below
 #define LoadTexture(path, srv) CreateWICTextureFromFile(Graphics::Device.Get(), Graphics::Context.Get(), FixPath(path).c_str(), 0, srv.GetAddressOf());
 	LoadTexture(AssetPath + L"Textures/PBR/cobblestone_albedo.png", cobbleA);
@@ -156,6 +160,11 @@ void Game::LoadAssetsAndCreateEntities()
 	LoadTexture(AssetPath + L"Textures/PBR/wood_normals.png", woodN);
 	LoadTexture(AssetPath + L"Textures/PBR/wood_roughness.png", woodR);
 	LoadTexture(AssetPath + L"Textures/PBR/wood_metal.png", woodM);
+
+	LoadTexture(AssetPath + L"Textures/Particles/Black/fire_01.png", fire);
+	LoadTexture(AssetPath + L"Textures/Particles/Black/twirl_02.png", twirl);
+	LoadTexture(AssetPath + L"Textures/Particles/Black/star_04.png", star);
+	LoadTexture(AssetPath + L"Textures/Particles/flame_animated.png", flame_animated);
 #undef LoadTexture
 
 
@@ -194,8 +203,6 @@ void Game::LoadAssetsAndCreateEntities()
 		skyVS,
 		skyPS,
 		sampler);
-
-
 
 	// Create basic materials
 	std::shared_ptr<Material> cobbleMat2x = std::make_shared<Material>("Cobblestone (2x Scale)", pixelShader, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
@@ -282,6 +289,25 @@ void Game::LoadAssetsAndCreateEntities()
 	}
 	RandomizeEntities();
 
+	// Create particle materials from demo
+	std::shared_ptr<Material> fireParticle = std::make_shared<Material>("Fire Particle", particlePS, particleVS, XMFLOAT3(1, 1, 1));
+	fireParticle->AddSampler("BasicSampler", sampler);
+	fireParticle->AddTextureSRV("Particle", fire);
+
+	std::shared_ptr<Material> twirlParticle = std::make_shared<Material>("Twirl Particle", particlePS, particleVS, XMFLOAT3(1, 1, 1));
+	twirlParticle->AddSampler("BasicSampler", sampler);
+	twirlParticle->AddTextureSRV("Particle", twirl);
+
+	std::shared_ptr<Material> starParticle = std::make_shared<Material>("Star Particle", particlePS, particleVS, XMFLOAT3(1, 1, 1));
+	starParticle->AddSampler("BasicSampler", sampler);
+	starParticle->AddTextureSRV("Particle", star);
+
+	std::shared_ptr<Material> animParticle = std::make_shared<Material>("Animated Particle", particlePS, particleVS, XMFLOAT3(1, 1, 1));
+	animParticle->AddSampler("BasicSampler", sampler);
+	animParticle->AddTextureSRV("Particle", flame_animated);
+
+
+
 	// === Create the line up entities =====================================
 	std::shared_ptr<GameEntity> cobSphere = std::make_shared<GameEntity>(sphereMesh, cobbleMat2x);
 	cobSphere->GetTransform()->SetPosition(-6, 0, 0);
@@ -357,6 +383,90 @@ void Game::LoadAssetsAndCreateEntities()
 	}
 
 	//create emitters
+	// Create example emitters
+
+	// Flame thrower
+	emitters.push_back(std::make_shared<Emitter>(
+		160,							// Max particles
+		30,								// Particles per second
+		5.0f,							// Particle lifetime
+		0.1f,							// Start size
+		4.0f,							// End size
+		XMFLOAT4(1, 0.1f, 0.1f, 0.7f),	// Start color
+		XMFLOAT4(1, 0.6f, 0.1f, 0),		// End color
+		XMFLOAT3(-2, 2, 0),				// Start velocity
+		XMFLOAT3(2, 0, 0),				// Emitter position
+		XMFLOAT3(0, -1, 0),				// Constant acceleration
+		fireParticle));
+
+	// Erratic swirly portal
+	emitters.push_back(std::make_shared<Emitter>(
+		45,								// Max particles
+		20,								// Particles per second
+		2.0f,							// Particle lifetime
+		3.0f,							// Start size
+		2.0f,							// End size
+		XMFLOAT4(0.2f, 0.1f, 0.1f, 0.0f),// Start color
+		XMFLOAT4(0.2f, 0.7f, 0.1f, 1.0f),// End color
+		XMFLOAT3(0, 0, 0),				// Start velocity
+		XMFLOAT3(3.5f, 3.5f, 0),		// Emitter position
+		XMFLOAT3(0, 0, 0),				// Constant acceleration
+		twirlParticle));
+
+	// Falling star field
+	emitters.push_back(std::make_shared<Emitter>(
+		250,							// Max particles
+		100,							// Particles per second
+		2.0f,							// Particle lifetime
+		2.0f,							// Start size
+		0.0f,							// End size
+		XMFLOAT4(0.1f, 0.2f, 0.5f, 0.0f),// Start color
+		XMFLOAT4(0.1f, 0.1f, 0.3f, 3.0f),// End color (ending with high alpha so we hit 1.0 sooner)
+		XMFLOAT3(0, 0, 0),				// Start velocity
+		XMFLOAT3(-2.5f, -1, 0),			// Emitter position
+		XMFLOAT3(0, -2, 0),				// Constant acceleration
+		starParticle));
+
+	// Animated fire texture
+	emitters.push_back(std::make_shared<Emitter>(
+		5,						// Max particles
+		2,						// Particles per second
+		2.0f,					// Particle lifetime
+		2.0f,					// Start size
+		2.0f,					// End size
+		XMFLOAT4(1, 1, 1, 1),	// Start color
+		XMFLOAT4(1, 1, 1, 0),	// End color
+		XMFLOAT3(0, 0, 0),		// Start velocity
+		XMFLOAT3(2, -2, 0),		// Emitter position
+		XMFLOAT3(0, 0, 0),		// Constant acceleration
+		animParticle));
+
+
+	// Set up render states for particles (since all emitters might use similar ones)
+	D3D11_DEPTH_STENCIL_DESC particleDepthDesc = {};
+	particleDepthDesc.DepthEnable = true; // READ from depth buffer
+	particleDepthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; // No depth WRITING
+	particleDepthDesc.DepthFunc = D3D11_COMPARISON_LESS; // Standard depth comparison
+	Graphics::Device->CreateDepthStencilState(&particleDepthDesc, particleDepthState.GetAddressOf());
+
+	// Blend state description for either additive or alpha blending (based on “additive” boolean)
+	D3D11_BLEND_DESC additiveBlendDesc = {};
+	additiveBlendDesc.RenderTarget[0].BlendEnable = true;
+	additiveBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD; // Add both colors
+	additiveBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD; // Add both alpha values
+	additiveBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	additiveBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	additiveBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	additiveBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+	additiveBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	Graphics::Device->CreateBlendState(&additiveBlendDesc, particleBlendState.GetAddressOf());
+
+	//// Debug rasterizer state for particles
+	//D3D11_RASTERIZER_DESC rd = {};
+	//rd.CullMode = D3D11_CULL_BACK;
+	//rd.DepthClipEnable = true;
+	//rd.FillMode = D3D11_FILL_WIREFRAME;
+	//Graphics::Device->CreateRasterizerState(&rd, particleDebugRasterState.GetAddressOf());
 }
 
 // --------------------------------------------------------
@@ -635,6 +745,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	// Draw the light sources
 	if (lightOptions.DrawLights) DrawLightSources();
 
+	CreateEmitters(totalTime);
 	// Frame END
 	// - These should happen exactly ONCE PER FRAME
 	// - At the very end of the frame (after drawing *everything*)
@@ -718,4 +829,21 @@ void Game::DrawLightSources()
 		Graphics::Context->DrawIndexed(indexCount, 0, 0);
 	}
 
+}
+
+void Game::CreateEmitters(float time)
+{
+	Graphics::Context->OMSetBlendState(particleBlendState.Get(), 0, 0xffffffff);	// Additive blending
+	Graphics::Context->OMSetDepthStencilState(particleDepthState.Get(), 0);		// No depth WRITING
+
+	// Draw emitters
+	for (auto& e : emitters)
+	{
+		e->Draw(camera, time);
+	}
+
+	// Reset to default states for next frame
+	Graphics::Context->OMSetBlendState(0, 0, 0xffffffff);
+	Graphics::Context->OMSetDepthStencilState(0, 0);
+	Graphics::Context->RSSetState(0);
 }
