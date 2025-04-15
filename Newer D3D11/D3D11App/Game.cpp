@@ -161,10 +161,10 @@ void Game::LoadAssetsAndCreateEntities()
 	LoadTexture(AssetPath + L"Textures/PBR/wood_roughness.png", woodR);
 	LoadTexture(AssetPath + L"Textures/PBR/wood_metal.png", woodM);
 
-	LoadTexture(AssetPath + L"Textures/Particles/Black/fire_01.png", fire);
-	LoadTexture(AssetPath + L"Textures/Particles/Black/twirl_02.png", twirl);
-	LoadTexture(AssetPath + L"Textures/Particles/Black/star_04.png", star);
-	LoadTexture(AssetPath + L"Textures/Particles/flame_animated.png", flame_animated);
+	LoadTexture(AssetPath + L"Particles/PNG (Black background)/fire_01.png", fire);
+	LoadTexture(AssetPath + L"Particles/PNG (Black background)/twirl_02.png", twirl);
+	LoadTexture(AssetPath + L"Particles/PNG (Black background)/star_04.png", star);
+	LoadTexture(AssetPath + L"Particles/flame_animated.png", flame_animated);
 #undef LoadTexture
 
 
@@ -383,7 +383,7 @@ void Game::LoadAssetsAndCreateEntities()
 	}
 
 	//create emitters
-	// Create example emitters
+	//example emitters taken from chris code to test
 
 	// Flame thrower
 	emitters.push_back(std::make_shared<Emitter>(
@@ -395,7 +395,11 @@ void Game::LoadAssetsAndCreateEntities()
 		XMFLOAT4(1, 0.1f, 0.1f, 0.7f),	// Start color
 		XMFLOAT4(1, 0.6f, 0.1f, 0),		// End color
 		XMFLOAT3(-2, 2, 0),				// Start velocity
+		XMFLOAT3(0.2f, 0.2f, 0.2f),		// Velocity randomness range
 		XMFLOAT3(2, 0, 0),				// Emitter position
+		XMFLOAT3(0.1f, 0.1f, 0.1f),		// Position randomness range
+		XMFLOAT2(-2, 2),				// Random rotation - startMin, startMax
+		XMFLOAT2(-2, 2),				// Random rotation - endMin, endMax
 		XMFLOAT3(0, -1, 0),				// Constant acceleration
 		fireParticle));
 
@@ -409,7 +413,11 @@ void Game::LoadAssetsAndCreateEntities()
 		XMFLOAT4(0.2f, 0.1f, 0.1f, 0.0f),// Start color
 		XMFLOAT4(0.2f, 0.7f, 0.1f, 1.0f),// End color
 		XMFLOAT3(0, 0, 0),				// Start velocity
+		XMFLOAT3(0, 0, 0),				// Velocity randomness range
 		XMFLOAT3(3.5f, 3.5f, 0),		// Emitter position
+		XMFLOAT3(0, 0, 0),				// Position randomness range
+		XMFLOAT2(-5, 5),				// Random rotation - startMin, startMax
+		XMFLOAT2(-5, 5),				// Random rotation - endMin, endMax
 		XMFLOAT3(0, 0, 0),				// Constant acceleration
 		twirlParticle));
 
@@ -423,7 +431,11 @@ void Game::LoadAssetsAndCreateEntities()
 		XMFLOAT4(0.1f, 0.2f, 0.5f, 0.0f),// Start color
 		XMFLOAT4(0.1f, 0.1f, 0.3f, 3.0f),// End color (ending with high alpha so we hit 1.0 sooner)
 		XMFLOAT3(0, 0, 0),				// Start velocity
+		XMFLOAT3(0.1f, 0, 0.1f),		// Velocity randomness range
 		XMFLOAT3(-2.5f, -1, 0),			// Emitter position
+		XMFLOAT3(1, 0, 1),				// Position randomness range
+		XMFLOAT2(0, 0),					// Random rotation - startMin, startMax
+		XMFLOAT2(-3, 3),				// Random rotation - endMin, endMax
 		XMFLOAT3(0, -2, 0),				// Constant acceleration
 		starParticle));
 
@@ -437,9 +449,15 @@ void Game::LoadAssetsAndCreateEntities()
 		XMFLOAT4(1, 1, 1, 1),	// Start color
 		XMFLOAT4(1, 1, 1, 0),	// End color
 		XMFLOAT3(0, 0, 0),		// Start velocity
+		XMFLOAT3(0, 0, 0),		// Velocity randomness range
 		XMFLOAT3(2, -2, 0),		// Emitter position
+		XMFLOAT3(0, 0, 0),		// Position randomness range
+		XMFLOAT2(-2, 2),		// Random rotation - startMin, startMax
+		XMFLOAT2(-2, 2),		// Random rotation - endMin, endMax
 		XMFLOAT3(0, 0, 0),		// Constant acceleration
-		animParticle));
+		animParticle,
+		8,
+		8));
 
 
 	// Set up render states for particles (since all emitters might use similar ones)
@@ -461,12 +479,13 @@ void Game::LoadAssetsAndCreateEntities()
 	additiveBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	Graphics::Device->CreateBlendState(&additiveBlendDesc, particleBlendState.GetAddressOf());
 
-	//// Debug rasterizer state for particles
-	//D3D11_RASTERIZER_DESC rd = {};
-	//rd.CullMode = D3D11_CULL_BACK;
-	//rd.DepthClipEnable = true;
-	//rd.FillMode = D3D11_FILL_WIREFRAME;
-	//Graphics::Device->CreateRasterizerState(&rd, particleDebugRasterState.GetAddressOf());
+	// Debug testing
+	D3D11_RASTERIZER_DESC rd = {};
+	rd.CullMode = D3D11_CULL_BACK;
+	rd.DepthClipEnable = true;
+	rd.FillMode = D3D11_FILL_WIREFRAME;
+	Graphics::Device->CreateRasterizerState(&rd, particleDebugRasterState.GetAddressOf());
+
 }
 
 // --------------------------------------------------------
@@ -608,7 +627,7 @@ void Game::Update(float deltaTime, float totalTime)
 	// this frame's interface.  Note that the building
 	// of the UI could happen at any point during update.
 	UINewFrame(deltaTime);
-	BuildUI(camera, meshes, *currentScene, materials, lights, lightOptions);
+	BuildUI(camera, meshes, *currentScene, materials, emitters, lights, lightOptions);
 
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::KeyDown(VK_ESCAPE))
@@ -839,7 +858,17 @@ void Game::CreateEmitters(float time)
 	// Draw emitters
 	for (auto& e : emitters)
 	{
-		e->Draw(camera, time);
+		e->Draw(camera, time, 0);
+	}
+
+	//show debug info
+	if (Input::KeyDown('C'))
+	{
+		Graphics::Context->RSSetState(particleDebugRasterState.Get());
+		for (auto& e : emitters)
+		{
+			e->Draw(camera, time, true);
+		}
 	}
 
 	// Reset to default states for next frame

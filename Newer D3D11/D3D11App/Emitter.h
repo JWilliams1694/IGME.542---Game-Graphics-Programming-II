@@ -21,28 +21,35 @@ class Emitter
 {
 public:
 	Emitter(int maxParticles,
-		int particlesPerSec,
-		float maxLifetime,
-		float startSize,
-		float endSize,
-		DirectX::XMFLOAT4 startColor,
-		DirectX::XMFLOAT4 endColor,
-		DirectX::XMFLOAT3 startVelocity,
-		DirectX::XMFLOAT3 emitterPosition,
-		DirectX::XMFLOAT3 emitterAcceleration,
-		std::shared_ptr<Material> material);
+			int particlesPerSec,
+			float maxLifetime,
+			float startSize,
+			float endSize,
+			DirectX::XMFLOAT4 startColor,
+			DirectX::XMFLOAT4 endColor,
+			DirectX::XMFLOAT3 startVelocity,
+			DirectX::XMFLOAT3 velocityRandomRange,
+			DirectX::XMFLOAT3 emitterPosition,
+			DirectX::XMFLOAT3 positionRandomRange,
+			DirectX::XMFLOAT2 rotationStartMinMax,
+			DirectX::XMFLOAT2 rotationEndMinMax,
+			DirectX::XMFLOAT3 emitterAcceleration,
+			std::shared_ptr<Material> material,
+			unsigned int spriteSheetWidth = 1,
+			unsigned int spriteSheetHeight = 1,
+			float spriteSheetSpeedScale = 1.0f);
 	~Emitter();
 
 	//methods
 	void Update(float dt, float currentTime);
-	void Draw(std::shared_ptr<Camera> camera, float currentTime);
+	void Draw(std::shared_ptr<Camera> camera, float currentTime, bool debug);
 
 	//getters & setters
 	std::shared_ptr<Transform> GetTransform();
 
 	std::shared_ptr<Material> GetMaterial();
 	void SetMaterial(std::shared_ptr<Material> material);
-	
+
 	int GetParticlesPerSec();
 	void SetParticlesPerSec(int particlesPerSec);
 
@@ -56,6 +63,16 @@ public:
 	DirectX::XMFLOAT3 emitterAcceleration;
 	float startSize;
 	float endSize;
+	float maxLifetime; // The max lifetime of particles
+	//random vars
+	DirectX::XMFLOAT3 positionRandomRange;
+	DirectX::XMFLOAT3 velocityRandomRange;
+	DirectX::XMFLOAT2 rotationStartMinMax;
+	DirectX::XMFLOAT2 rotationEndMinMax;
+
+	//sprite stuff
+	float spriteSheetSpeedScale;
+	bool IsSpriteSheet();
 
 private:
 	//particle properties
@@ -67,7 +84,6 @@ private:
 
 
 	//emission properties
-	float maxLifetime; // The max lifetime of particles
 	int particlesPerSec; // How many particles to emit each second
 	float secondsPerParticle; // How many seconds between each particle emission
 	float totalEmitTime; // How many (fractional) seconds between each particle emission
@@ -77,6 +93,12 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> particleDataBuffer;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> particleDataSRV;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
+
+	//sprite stuff
+	int spriteSheetWidth;
+	int spriteSheetHeight;
+	float spriteSheetFrameWidth;
+	float spriteSheetFrameHeight;
 
 	//methods
 	void CreateParticleBuffer();
