@@ -121,7 +121,7 @@ void Game::LoadAssetsAndCreateEntities()
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodA, woodN, woodR, woodM;
 
 	//load particles
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> fire, twirl, star, flame_animated;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> flare, magic, scorch, star;
 
 
 	// Quick pre-processor macro for simplifying texture loading calls below
@@ -161,10 +161,10 @@ void Game::LoadAssetsAndCreateEntities()
 	LoadTexture(AssetPath + L"Textures/PBR/wood_roughness.png", woodR);
 	LoadTexture(AssetPath + L"Textures/PBR/wood_metal.png", woodM);
 
-	LoadTexture(AssetPath + L"Particles/PNG (Black background)/fire_01.png", fire);
-	LoadTexture(AssetPath + L"Particles/PNG (Black background)/twirl_02.png", twirl);
+	LoadTexture(AssetPath + L"Particles/PNG (Black background)/flare_01.png", flare);
+	LoadTexture(AssetPath + L"Particles/PNG (Black background)/magic_04.png", magic);
+	LoadTexture(AssetPath + L"Particles/PNG (Black background)/scorch_01.png", scorch);
 	LoadTexture(AssetPath + L"Particles/PNG (Black background)/star_04.png", star);
-	LoadTexture(AssetPath + L"Particles/flame_animated.png", flame_animated);
 #undef LoadTexture
 
 
@@ -290,22 +290,21 @@ void Game::LoadAssetsAndCreateEntities()
 	RandomizeEntities();
 
 	// Create particle materials from demo
-	std::shared_ptr<Material> fireParticle = std::make_shared<Material>("Fire Particle", particlePS, particleVS, XMFLOAT3(1, 1, 1));
-	fireParticle->AddSampler("BasicSampler", sampler);
-	fireParticle->AddTextureSRV("Particle", fire);
+	std::shared_ptr<Material> flareParticle = std::make_shared<Material>("Flare Particle", particlePS, particleVS, XMFLOAT3(1, 1, 1));
+	flareParticle->AddSampler("BasicSampler", sampler);
+	flareParticle->AddTextureSRV("Particle", flare);
 
-	std::shared_ptr<Material> twirlParticle = std::make_shared<Material>("Twirl Particle", particlePS, particleVS, XMFLOAT3(1, 1, 1));
-	twirlParticle->AddSampler("BasicSampler", sampler);
-	twirlParticle->AddTextureSRV("Particle", twirl);
+	std::shared_ptr<Material> magicParticle = std::make_shared<Material>("Magic Particle", particlePS, particleVS, XMFLOAT3(1, 1, 1));
+	magicParticle->AddSampler("BasicSampler", sampler);
+	magicParticle->AddTextureSRV("Particle", magic);
+
+	std::shared_ptr<Material> scorchParticle = std::make_shared<Material>("Scorch Particle", particlePS, particleVS, XMFLOAT3(1, 1, 1));
+	scorchParticle->AddSampler("BasicSampler", sampler);
+	scorchParticle->AddTextureSRV("Particle", scorch);
 
 	std::shared_ptr<Material> starParticle = std::make_shared<Material>("Star Particle", particlePS, particleVS, XMFLOAT3(1, 1, 1));
 	starParticle->AddSampler("BasicSampler", sampler);
 	starParticle->AddTextureSRV("Particle", star);
-
-	std::shared_ptr<Material> animParticle = std::make_shared<Material>("Animated Particle", particlePS, particleVS, XMFLOAT3(1, 1, 1));
-	animParticle->AddSampler("BasicSampler", sampler);
-	animParticle->AddTextureSRV("Particle", flame_animated);
-
 
 
 	// === Create the line up entities =====================================
@@ -383,27 +382,6 @@ void Game::LoadAssetsAndCreateEntities()
 	}
 
 	//create emitters
-	//example emitters taken from chris code to test
-
-	// Flame thrower
-	//emitters.push_back(std::make_shared<Emitter>(
-	//	160,							// Max particles
-	//	30,								// Particles per second
-	//	5.0f,							// Particle lifetime
-	//	0.1f,							// Start size
-	//	4.0f,							// End size
-	//	XMFLOAT4(1, 0.1f, 0.1f, 0.7f),	// Start color
-	//	XMFLOAT4(1, 0.6f, 0.1f, 0),		// End color
-	//	XMFLOAT3(-2, 2, 0),				// Start velocity
-	//	XMFLOAT3(0.2f, 0.2f, 0.2f),		// Velocity randomness range
-	//	XMFLOAT3(2, 0, 0),				// Emitter position
-	//	XMFLOAT3(0.1f, 0.1f, 0.1f),		// Position randomness range
-	//	XMFLOAT2(-2, 2),				// Random rotation - startMin, startMax
-	//	XMFLOAT2(-2, 2),				// Random rotation - endMin, endMax
-	//	XMFLOAT3(0, -1, 0),				// Constant acceleration
-	//	fireParticle));
-
-	// Erratic swirly portal
 	emitters.push_back(std::make_shared<Emitter>(
 		45,								// Max particles
 		20,								// Particles per second
@@ -413,52 +391,13 @@ void Game::LoadAssetsAndCreateEntities()
 		XMFLOAT4(0.2f, 0.1f, 0.1f, 0.0f),// Start color
 		XMFLOAT4(0.2f, 0.7f, 0.1f, 1.0f),// End color
 		XMFLOAT3(0, 0, 0),				// Start velocity
-		XMFLOAT3(0, 0, 0),				// Velocity randomness range
+		XMFLOAT3(5, 5, 5),				// Velocity randomness range
 		XMFLOAT3(3.5f, 3.5f, 0),		// Emitter position
-		XMFLOAT3(0, 0, 0),				// Position randomness range
+		XMFLOAT3(5, 5, 5),				// Position randomness range
 		XMFLOAT2(-5, 5),				// Random rotation - startMin, startMax
 		XMFLOAT2(-5, 5),				// Random rotation - endMin, endMax
-		XMFLOAT3(0, 0, 0),				// Constant acceleration
-		twirlParticle));
-
-	// Falling star field
-	//emitters.push_back(std::make_shared<Emitter>(
-	//	250,							// Max particles
-	//	100,							// Particles per second
-	//	2.0f,							// Particle lifetime
-	//	2.0f,							// Start size
-	//	0.0f,							// End size
-	//	XMFLOAT4(0.1f, 0.2f, 0.5f, 0.0f),// Start color
-	//	XMFLOAT4(0.1f, 0.1f, 0.3f, 3.0f),// End color (ending with high alpha so we hit 1.0 sooner)
-	//	XMFLOAT3(0, 0, 0),				// Start velocity
-	//	XMFLOAT3(0.1f, 0, 0.1f),		// Velocity randomness range
-	//	XMFLOAT3(-2.5f, -1, 0),			// Emitter position
-	//	XMFLOAT3(1, 0, 1),				// Position randomness range
-	//	XMFLOAT2(0, 0),					// Random rotation - startMin, startMax
-	//	XMFLOAT2(-3, 3),				// Random rotation - endMin, endMax
-	//	XMFLOAT3(0, -2, 0),				// Constant acceleration
-	//	starParticle));
-
-	// Animated fire texture
-	//emitters.push_back(std::make_shared<Emitter>(
-	//	5,						// Max particles
-	//	2,						// Particles per second
-	//	2.0f,					// Particle lifetime
-	//	2.0f,					// Start size
-	//	2.0f,					// End size
-	//	XMFLOAT4(1, 1, 1, 1),	// Start color
-	//	XMFLOAT4(1, 1, 1, 0),	// End color
-	//	XMFLOAT3(0, 0, 0),		// Start velocity
-	//	XMFLOAT3(0, 0, 0),		// Velocity randomness range
-	//	XMFLOAT3(2, -2, 0),		// Emitter position
-	//	XMFLOAT3(0, 0, 0),		// Position randomness range
-	//	XMFLOAT2(-2, 2),		// Random rotation - startMin, startMax
-	//	XMFLOAT2(-2, 2),		// Random rotation - endMin, endMax
-	//	XMFLOAT3(0, 0, 0),		// Constant acceleration
-	//	animParticle,
-	//	8,
-	//	8));
-
+		XMFLOAT3(1, 1, 1),				// Constant acceleration
+		magicParticle));
 
 	// Set up render states for particles (since all emitters might use similar ones)
 	D3D11_DEPTH_STENCIL_DESC particleDepthDesc = {};
@@ -485,7 +424,6 @@ void Game::LoadAssetsAndCreateEntities()
 	rd.DepthClipEnable = true;
 	rd.FillMode = D3D11_FILL_WIREFRAME;
 	Graphics::Device->CreateRasterizerState(&rd, particleDebugRasterState.GetAddressOf());
-
 }
 
 // --------------------------------------------------------
@@ -638,7 +576,7 @@ void Game::Update(float deltaTime, float totalTime)
 
 	for (auto& e : emitters)
 	{
-		e->Update(deltaTime,totalTime);
+		e->Update(deltaTime, totalTime);
 	}
 
 	// Move lights

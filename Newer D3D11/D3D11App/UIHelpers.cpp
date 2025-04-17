@@ -275,7 +275,7 @@ void BuildUI(
 		}
 
 		// === Emitters ===
-		if (ImGui::TreeNode("Particle Emitters"))
+		if (ImGui::TreeNode("Emitters"))
 		{
 
 			for (int i = 0; i < emitters.size(); i++)
@@ -293,7 +293,6 @@ void BuildUI(
 			ImGui::TreePop();
 		}
 	}
-
 	ImGui::End();
 }
 
@@ -480,6 +479,7 @@ void UIEmitter(std::shared_ptr<Emitter> emitter)
 		int maxPart = emitter->GetMaxParticles();
 		if (ImGui::DragInt("Max Particles", &maxPart, 1.0f, 1, 2000))
 			emitter->SetMaxParticles(maxPart);
+
 
 		int partPerSec = emitter->GetParticlesPerSec();
 		if (ImGui::DragInt("Particles Per Second", &partPerSec, 1.0f, 1, 2000))
