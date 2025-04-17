@@ -49,6 +49,7 @@ Emitter::Emitter(int maxParticles,
 	indexFirstDead = 0;
 	livingParticles = 0;
 	lastEmit = 0;
+	totalEmitTime = 0;
 
 	CreateParticleBuffer();
 }
@@ -91,12 +92,13 @@ void Emitter::Update(float dt, float currentTime)
 				CheckSingleParticle(totalEmitTime, i);
 			}
 		}
-		// Update the particle data
-		while (lastEmit > secondsPerParticle)
-		{
-			EmitParticle(currentTime);
-			lastEmit -= secondsPerParticle;
-		}
+		
+	}
+	// Update the particle data
+	while (lastEmit > secondsPerParticle)
+	{
+		EmitParticle(currentTime);
+		lastEmit -= secondsPerParticle;
 	}
 }
 

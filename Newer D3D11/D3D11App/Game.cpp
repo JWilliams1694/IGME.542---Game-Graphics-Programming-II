@@ -386,22 +386,22 @@ void Game::LoadAssetsAndCreateEntities()
 	//example emitters taken from chris code to test
 
 	// Flame thrower
-	emitters.push_back(std::make_shared<Emitter>(
-		160,							// Max particles
-		30,								// Particles per second
-		5.0f,							// Particle lifetime
-		0.1f,							// Start size
-		4.0f,							// End size
-		XMFLOAT4(1, 0.1f, 0.1f, 0.7f),	// Start color
-		XMFLOAT4(1, 0.6f, 0.1f, 0),		// End color
-		XMFLOAT3(-2, 2, 0),				// Start velocity
-		XMFLOAT3(0.2f, 0.2f, 0.2f),		// Velocity randomness range
-		XMFLOAT3(2, 0, 0),				// Emitter position
-		XMFLOAT3(0.1f, 0.1f, 0.1f),		// Position randomness range
-		XMFLOAT2(-2, 2),				// Random rotation - startMin, startMax
-		XMFLOAT2(-2, 2),				// Random rotation - endMin, endMax
-		XMFLOAT3(0, -1, 0),				// Constant acceleration
-		fireParticle));
+	//emitters.push_back(std::make_shared<Emitter>(
+	//	160,							// Max particles
+	//	30,								// Particles per second
+	//	5.0f,							// Particle lifetime
+	//	0.1f,							// Start size
+	//	4.0f,							// End size
+	//	XMFLOAT4(1, 0.1f, 0.1f, 0.7f),	// Start color
+	//	XMFLOAT4(1, 0.6f, 0.1f, 0),		// End color
+	//	XMFLOAT3(-2, 2, 0),				// Start velocity
+	//	XMFLOAT3(0.2f, 0.2f, 0.2f),		// Velocity randomness range
+	//	XMFLOAT3(2, 0, 0),				// Emitter position
+	//	XMFLOAT3(0.1f, 0.1f, 0.1f),		// Position randomness range
+	//	XMFLOAT2(-2, 2),				// Random rotation - startMin, startMax
+	//	XMFLOAT2(-2, 2),				// Random rotation - endMin, endMax
+	//	XMFLOAT3(0, -1, 0),				// Constant acceleration
+	//	fireParticle));
 
 	// Erratic swirly portal
 	emitters.push_back(std::make_shared<Emitter>(
@@ -422,42 +422,42 @@ void Game::LoadAssetsAndCreateEntities()
 		twirlParticle));
 
 	// Falling star field
-	emitters.push_back(std::make_shared<Emitter>(
-		250,							// Max particles
-		100,							// Particles per second
-		2.0f,							// Particle lifetime
-		2.0f,							// Start size
-		0.0f,							// End size
-		XMFLOAT4(0.1f, 0.2f, 0.5f, 0.0f),// Start color
-		XMFLOAT4(0.1f, 0.1f, 0.3f, 3.0f),// End color (ending with high alpha so we hit 1.0 sooner)
-		XMFLOAT3(0, 0, 0),				// Start velocity
-		XMFLOAT3(0.1f, 0, 0.1f),		// Velocity randomness range
-		XMFLOAT3(-2.5f, -1, 0),			// Emitter position
-		XMFLOAT3(1, 0, 1),				// Position randomness range
-		XMFLOAT2(0, 0),					// Random rotation - startMin, startMax
-		XMFLOAT2(-3, 3),				// Random rotation - endMin, endMax
-		XMFLOAT3(0, -2, 0),				// Constant acceleration
-		starParticle));
+	//emitters.push_back(std::make_shared<Emitter>(
+	//	250,							// Max particles
+	//	100,							// Particles per second
+	//	2.0f,							// Particle lifetime
+	//	2.0f,							// Start size
+	//	0.0f,							// End size
+	//	XMFLOAT4(0.1f, 0.2f, 0.5f, 0.0f),// Start color
+	//	XMFLOAT4(0.1f, 0.1f, 0.3f, 3.0f),// End color (ending with high alpha so we hit 1.0 sooner)
+	//	XMFLOAT3(0, 0, 0),				// Start velocity
+	//	XMFLOAT3(0.1f, 0, 0.1f),		// Velocity randomness range
+	//	XMFLOAT3(-2.5f, -1, 0),			// Emitter position
+	//	XMFLOAT3(1, 0, 1),				// Position randomness range
+	//	XMFLOAT2(0, 0),					// Random rotation - startMin, startMax
+	//	XMFLOAT2(-3, 3),				// Random rotation - endMin, endMax
+	//	XMFLOAT3(0, -2, 0),				// Constant acceleration
+	//	starParticle));
 
 	// Animated fire texture
-	emitters.push_back(std::make_shared<Emitter>(
-		5,						// Max particles
-		2,						// Particles per second
-		2.0f,					// Particle lifetime
-		2.0f,					// Start size
-		2.0f,					// End size
-		XMFLOAT4(1, 1, 1, 1),	// Start color
-		XMFLOAT4(1, 1, 1, 0),	// End color
-		XMFLOAT3(0, 0, 0),		// Start velocity
-		XMFLOAT3(0, 0, 0),		// Velocity randomness range
-		XMFLOAT3(2, -2, 0),		// Emitter position
-		XMFLOAT3(0, 0, 0),		// Position randomness range
-		XMFLOAT2(-2, 2),		// Random rotation - startMin, startMax
-		XMFLOAT2(-2, 2),		// Random rotation - endMin, endMax
-		XMFLOAT3(0, 0, 0),		// Constant acceleration
-		animParticle,
-		8,
-		8));
+	//emitters.push_back(std::make_shared<Emitter>(
+	//	5,						// Max particles
+	//	2,						// Particles per second
+	//	2.0f,					// Particle lifetime
+	//	2.0f,					// Start size
+	//	2.0f,					// End size
+	//	XMFLOAT4(1, 1, 1, 1),	// Start color
+	//	XMFLOAT4(1, 1, 1, 0),	// End color
+	//	XMFLOAT3(0, 0, 0),		// Start velocity
+	//	XMFLOAT3(0, 0, 0),		// Velocity randomness range
+	//	XMFLOAT3(2, -2, 0),		// Emitter position
+	//	XMFLOAT3(0, 0, 0),		// Position randomness range
+	//	XMFLOAT2(-2, 2),		// Random rotation - startMin, startMax
+	//	XMFLOAT2(-2, 2),		// Random rotation - endMin, endMax
+	//	XMFLOAT3(0, 0, 0),		// Constant acceleration
+	//	animParticle,
+	//	8,
+	//	8));
 
 
 	// Set up render states for particles (since all emitters might use similar ones)
@@ -635,6 +635,11 @@ void Game::Update(float deltaTime, float totalTime)
 
 	// Update the camera this frame
 	camera->Update(deltaTime);
+
+	for (auto& e : emitters)
+	{
+		e->Update(deltaTime,totalTime);
+	}
 
 	// Move lights
 	for (int i = 0; i < lightOptions.LightCount && !lightOptions.FreezeLightMovement; i++)

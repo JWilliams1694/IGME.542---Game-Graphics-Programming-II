@@ -108,5 +108,9 @@ private:
 
 	std::shared_ptr<Transform> transform;
 	std::shared_ptr<Material> material;
+
+	//testing ideas
+//living and dead particles are never being updared
+	
 };
 
