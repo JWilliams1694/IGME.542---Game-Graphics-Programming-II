@@ -12,9 +12,14 @@ struct Particle
 	float EmitTime;
 	DirectX::XMFLOAT3 StartPos;
 	DirectX::XMFLOAT3 StartVelocity;
-	float StartRotation;
-	float EndRotation;
-	DirectX::XMFLOAT3 padding;
+	float padding;
+};
+
+enum class EmitterShape
+{
+	Point,
+	Box,
+	Sphere
 };
 
 class Emitter
@@ -31,13 +36,8 @@ public:
 			DirectX::XMFLOAT3 velocityRandomRange,
 			DirectX::XMFLOAT3 emitterPosition,
 			DirectX::XMFLOAT3 positionRandomRange,
-			DirectX::XMFLOAT2 rotationStartMinMax,
-			DirectX::XMFLOAT2 rotationEndMinMax,
 			DirectX::XMFLOAT3 emitterAcceleration,
-			std::shared_ptr<Material> material,
-			unsigned int spriteSheetWidth = 1,
-			unsigned int spriteSheetHeight = 1,
-			float spriteSheetSpeedScale = 1.0f);
+			std::shared_ptr<Material> material);
 	~Emitter();
 
 	//methods
@@ -56,6 +56,9 @@ public:
 	int GetMaxParticles();
 	void SetMaxParticles(int maxParticles);
 
+	void SetShapeType(EmitterShape);
+	EmitterShape GetShapeType();
+
 	//variables
 	DirectX::XMFLOAT4 startColor;
 	DirectX::XMFLOAT4 endColor;
@@ -67,12 +70,6 @@ public:
 	//random vars
 	DirectX::XMFLOAT3 positionRandomRange;
 	DirectX::XMFLOAT3 velocityRandomRange;
-	DirectX::XMFLOAT2 rotationStartMinMax;
-	DirectX::XMFLOAT2 rotationEndMinMax;
-
-	//sprite stuff
-	float spriteSheetSpeedScale;
-	bool IsSpriteSheet();
 
 private:
 	//particle properties
@@ -82,6 +79,7 @@ private:
 	int indexFirstDead;
 	int indexFirstAlive;
 
+	EmitterShape shapeType = EmitterShape::Point;
 
 	//emission properties
 	int particlesPerSec; // How many particles to emit each second
@@ -94,12 +92,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> particleDataSRV;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 
-	//sprite stuff
-	int spriteSheetWidth;
-	int spriteSheetHeight;
-	float spriteSheetFrameWidth;
-	float spriteSheetFrameHeight;
-
 	//methods
 	void CreateParticleBuffer();
 	void CopyToGPU();
@@ -108,9 +100,5 @@ private:
 
 	std::shared_ptr<Transform> transform;
 	std::shared_ptr<Material> material;
-
-	//testing ideas
-//living and dead particles are never being updared
-	
 };
 

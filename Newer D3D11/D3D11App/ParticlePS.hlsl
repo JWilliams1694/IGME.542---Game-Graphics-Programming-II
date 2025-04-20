@@ -13,7 +13,5 @@ float4 main(VertexToPixel_Particle input) : SV_TARGET
     float4 color = Particle.Sample(BasicSampler, input.uv) * input.color;
     color.rgb *= colorTint;
 
-    //return float4(1, 1, 1, 1);
-    //return(float3(1,1,1), float4(1, 1, 1, 1), debug);
-    return lerp(color, float4(1, 1, 1, 0.5f), debug);
+    return lerp(color, float4(1, 1, 1, 1.0f), debug);
 }

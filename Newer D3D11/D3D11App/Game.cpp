@@ -59,7 +59,7 @@ void Game::Initialize()
 		.UsePBR = true,
 		.FreezeLightMovement = false,
 		.DrawLights = true,
-		.ShowSkybox = true,
+		.ShowSkybox = false,
 		.UseBurleyDiffuse = false,
 		.AmbientColor = XMFLOAT3(0,0,0)
 	};
@@ -193,12 +193,12 @@ void Game::LoadAssetsAndCreateEntities()
 
 	// Create the sky
 	sky = std::make_shared<Sky>(
-		FixPath(AssetPath + L"Skies/Clouds Blue/right.png").c_str(),
-		FixPath(AssetPath + L"Skies/Clouds Blue/left.png").c_str(),
-		FixPath(AssetPath + L"Skies/Clouds Blue/up.png").c_str(),
-		FixPath(AssetPath + L"Skies/Clouds Blue/down.png").c_str(),
-		FixPath(AssetPath + L"Skies/Clouds Blue/front.png").c_str(),
-		FixPath(AssetPath + L"Skies/Clouds Blue/back.png").c_str(),
+		FixPath(AssetPath + L"Skies/Planet/right.png").c_str(),
+		FixPath(AssetPath + L"Skies/Planet/left.png").c_str(),
+		FixPath(AssetPath + L"Skies/Planet/up.png").c_str(),
+		FixPath(AssetPath + L"Skies/Planet/down.png").c_str(),
+		FixPath(AssetPath + L"Skies/Planet/front.png").c_str(),
+		FixPath(AssetPath + L"Skies/Planet/back.png").c_str(),
 		cubeMesh,
 		skyVS,
 		skyPS,
@@ -289,7 +289,7 @@ void Game::LoadAssetsAndCreateEntities()
 	}
 	RandomizeEntities();
 
-	// Create particle materials from demo
+	// Create particle materials 
 	std::shared_ptr<Material> flareParticle = std::make_shared<Material>("Flare Particle", particlePS, particleVS, XMFLOAT3(1, 1, 1));
 	flareParticle->AddSampler("BasicSampler", sampler);
 	flareParticle->AddTextureSRV("Particle", flare);
@@ -305,7 +305,6 @@ void Game::LoadAssetsAndCreateEntities()
 	std::shared_ptr<Material> starParticle = std::make_shared<Material>("Star Particle", particlePS, particleVS, XMFLOAT3(1, 1, 1));
 	starParticle->AddSampler("BasicSampler", sampler);
 	starParticle->AddTextureSRV("Particle", star);
-
 
 	// === Create the line up entities =====================================
 	std::shared_ptr<GameEntity> cobSphere = std::make_shared<GameEntity>(sphereMesh, cobbleMat2x);
@@ -381,23 +380,74 @@ void Game::LoadAssetsAndCreateEntities()
 		geNonMetal->GetTransform()->SetPosition(i * 2.0f - 10.0f, -1, 0);
 	}
 
+
+
 	//create emitters
+	//magic stars
 	emitters.push_back(std::make_shared<Emitter>(
-		45,								// Max particles
-		20,								// Particles per second
-		2.0f,							// Particle lifetime
-		3.0f,							// Start size
-		2.0f,							// End size
-		XMFLOAT4(0.2f, 0.1f, 0.1f, 0.0f),// Start color
-		XMFLOAT4(0.2f, 0.7f, 0.1f, 1.0f),// End color
-		XMFLOAT3(0, 0, 0),				// Start velocity
-		XMFLOAT3(5, 5, 5),				// Velocity randomness range
-		XMFLOAT3(3.5f, 3.5f, 0),		// Emitter position
-		XMFLOAT3(5, 5, 5),				// Position randomness range
-		XMFLOAT2(-5, 5),				// Random rotation - startMin, startMax
-		XMFLOAT2(-5, 5),				// Random rotation - endMin, endMax
-		XMFLOAT3(1, 1, 1),				// Constant acceleration
+		300,							// Max particles
+		50,							// Particles per second
+		4.0f,							// Particle lifetime
+		1.0f,							// Start size
+		2.5f,							// End size
+		XMFLOAT4(0, 0.6f, 1, 0.25f),		// Start color
+		XMFLOAT4(0.7f, 0.1f, 0.6f, 1),	// End color
+		XMFLOAT3(0, 4, 0),				// Starting velocity
+		XMFLOAT3(2, 0, 2),				// Velocity randomness range
+		XMFLOAT3(5.5f, 1.0f, 0),			// Emitter position
+		XMFLOAT3(0, 0, 0),				// Position randomness range
+		XMFLOAT3(0, -3, 0),				//  acceleration
 		magicParticle));
+
+	// Flare
+	emitters.push_back(std::make_shared<Emitter>(
+		400,							// Max particles
+		145,								// Particles per second
+		3.0f,							// Particle lifetime
+		0.1f,							// Start size
+		4.0f,							// End size
+		XMFLOAT4(1, 0.1f, 0.1f, 0.7f),	// Start color
+		XMFLOAT4(1, 0.6f, 0.1f, 0),		// End color
+		XMFLOAT3(0, 0, 2),				// Starting velocity
+		XMFLOAT3(5, 0, 5),		// Velocity randomness range
+		XMFLOAT3(-5, -4, 0),				// Emitter position
+		XMFLOAT3(0.1f, 0.1f, 0.1f),		// Position randomness range
+		XMFLOAT3(0, 0, 0),				//  acceleration
+		flareParticle));
+
+	// Flare2
+	emitters.push_back(std::make_shared<Emitter>(
+		400,							// Max particles
+		145,								// Particles per second
+		1.0f,							// Particle lifetime
+		0.1f,							// Start size
+		4.0f,							// End size
+		XMFLOAT4(1, 0.1f, 0.1f, 0.7f),	// Start color
+		XMFLOAT4(1, 0.6f, 0.1f, 0),		// End color
+		XMFLOAT3(0, 2, 0),				// Starting velocity
+		XMFLOAT3(0, 0, 0),		// Velocity randomness range
+		XMFLOAT3(-2, 3, 0),			// Emitter position
+		XMFLOAT3(0.2f, 0.1f, 0.2f),		// Position randomness
+		XMFLOAT3(0, 2, 0),				//  acceleration
+		flareParticle));
+
+	// star particle
+	emitters.push_back(std::make_shared<Emitter>(
+		150,							// Max particles
+		25,							// Particles per second
+		4.0f,							// Particle lifetime
+		2.0f,							// Start size
+		10,							// End size
+		XMFLOAT4(0.1f, 0.2f, 0.5f, 0.0f),// Start color
+		XMFLOAT4(0.1f, 0.1f, 0.3f, 3.0f),// End color
+		XMFLOAT3(0, 0, 0),				// Starting velocity
+		XMFLOAT3(0.1f, 0.1f, 0.1f),		// Velocity randomness range
+		XMFLOAT3(-4, 3, 0),			// Emitter position
+		XMFLOAT3(0.5f, 0.5f, 0.5f),				// Position randomness range
+		XMFLOAT3(0, 0, 0),				//  acceleration
+		starParticle));
+
+
 
 	// Set up render states for particles (since all emitters might use similar ones)
 	D3D11_DEPTH_STENCIL_DESC particleDepthDesc = {};
@@ -417,13 +467,6 @@ void Game::LoadAssetsAndCreateEntities()
 	additiveBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
 	additiveBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	Graphics::Device->CreateBlendState(&additiveBlendDesc, particleBlendState.GetAddressOf());
-
-	// Debug testing
-	D3D11_RASTERIZER_DESC rd = {};
-	rd.CullMode = D3D11_CULL_BACK;
-	rd.DepthClipEnable = true;
-	rd.FillMode = D3D11_FILL_WIREFRAME;
-	Graphics::Device->CreateRasterizerState(&rd, particleDebugRasterState.GetAddressOf());
 }
 
 // --------------------------------------------------------
@@ -707,7 +750,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	// Draw the light sources
 	if (lightOptions.DrawLights) DrawLightSources();
 
-	CreateEmitters(totalTime);
+	DrawParticles(totalTime);
 	// Frame END
 	// - These should happen exactly ONCE PER FRAME
 	// - At the very end of the frame (after drawing *everything*)
@@ -793,10 +836,10 @@ void Game::DrawLightSources()
 
 }
 
-void Game::CreateEmitters(float time)
+void Game::DrawParticles(float time)
 {
-	Graphics::Context->OMSetBlendState(particleBlendState.Get(), 0, 0xffffffff);	// Additive blending
-	Graphics::Context->OMSetDepthStencilState(particleDepthState.Get(), 0);		// No depth WRITING
+	Graphics::Context->OMSetBlendState(particleBlendState.Get(), 0, 0xffffffff);
+	Graphics::Context->OMSetDepthStencilState(particleDepthState.Get(), 0);
 
 	// Draw emitters
 	for (auto& e : emitters)
@@ -804,17 +847,7 @@ void Game::CreateEmitters(float time)
 		e->Draw(camera, time, 0);
 	}
 
-	//show debug info
-	if (Input::KeyDown('C'))
-	{
-		Graphics::Context->RSSetState(particleDebugRasterState.Get());
-		for (auto& e : emitters)
-		{
-			e->Draw(camera, time, true);
-		}
-	}
-
-	// Reset to default states for next frame
+	// Reset for next frame
 	Graphics::Context->OMSetBlendState(0, 0, 0xffffffff);
 	Graphics::Context->OMSetDepthStencilState(0, 0);
 	Graphics::Context->RSSetState(0);

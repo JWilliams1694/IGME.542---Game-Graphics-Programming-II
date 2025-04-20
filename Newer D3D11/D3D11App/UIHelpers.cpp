@@ -4,6 +4,7 @@
 #include "UIHelpers.h"
 #include "Window.h"
 #include "Input.h"
+#include "Emitter.h"
 
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_dx11.h"
@@ -86,7 +87,7 @@ void BuildUI(
 		if (ImGui::TreeNode("Controls"))
 		{
 			ImGui::Spacing();
-			ImGui::Text("(WASD, X, Space)");    ImGui::SameLine(175); ImGui::Text("Move camera");
+			ImGui::Text("(WASD, Q, E)");    ImGui::SameLine(175); ImGui::Text("Move camera");
 			ImGui::Text("(Left Click & Drag)"); ImGui::SameLine(175); ImGui::Text("Rotate camera");
 			ImGui::Text("(Left Shift)");        ImGui::SameLine(175); ImGui::Text("Hold to speed up camera");
 			ImGui::Text("(Left Ctrl)");         ImGui::SameLine(175); ImGui::Text("Hold to slow down camera");
@@ -474,12 +475,8 @@ void UIEmitter(std::shared_ptr<Emitter> emitter)
 	{
 		ImGui::Indent(5.0f);
 
-		//ImGui::Checkbox("Paused", &emitter->paused);
-
 		int maxPart = emitter->GetMaxParticles();
-		if (ImGui::DragInt("Max Particles", &maxPart, 1.0f, 1, 2000))
-			emitter->SetMaxParticles(maxPart);
-
+		ImGui::Text("Max Particles: %d", maxPart); 
 
 		int partPerSec = emitter->GetParticlesPerSec();
 		if (ImGui::DragInt("Particles Per Second", &partPerSec, 1.0f, 1, 2000))
@@ -505,6 +502,13 @@ void UIEmitter(std::shared_ptr<Emitter> emitter)
 		ImGui::DragFloat3("Velocity Randomness", &emitter->velocityRandomRange.x, 0.05f);
 
 		ImGui::DragFloat3("Acceleration", &emitter->emitterAcceleration.x, 0.05f);
+		const char* shapeNames[] = { "Point", "Box", "Sphere" };
+		int shapeIndex = (int)emitter->GetShapeType();
+		if (ImGui::Combo("Emitter Shape", &shapeIndex, shapeNames, IM_ARRAYSIZE(shapeNames)))
+		{
+			emitter->SetShapeType((EmitterShape)shapeIndex);
+		}
+
 		ImGui::Indent(-5.0f);
 	}
 
@@ -513,33 +517,12 @@ void UIEmitter(std::shared_ptr<Emitter> emitter)
 	ImGui::Text("Visuals");
 	{
 		ImGui::Indent(5.0f);
-		//ImGui::Checkbox("Visible", &emitter->visible);
-
 
 		ImGui::ColorEdit4("Starting Color", &emitter->startColor.x);
 		ImGui::ColorEdit4("Ending Color", &emitter->endColor.x);
 
 		ImGui::SliderFloat("Starting Size", &emitter->startSize, 0.0f, 10.0f);
 		ImGui::SliderFloat("Ending Size", &emitter->endSize, 0.0f, 10.0f);
-
-		ImGui::DragFloatRange2(
-			"Rotation Start Range",
-			&emitter->rotationStartMinMax.x,
-			&emitter->rotationStartMinMax.y,
-			0.01f);
-
-		ImGui::DragFloatRange2(
-			"Rotation End Range",
-			&emitter->rotationEndMinMax.x,
-			&emitter->rotationEndMinMax.y,
-			0.01f);
-
-		//ImGui::Checkbox("Constrain Rotation on Y", &emitter->constrainYAxis);
-
-		if (emitter->IsSpriteSheet())
-		{
-			ImGui::SliderFloat("Sprite Sheet Animation Speed", &emitter->spriteSheetSpeedScale, 0.0f, 10.0f);
-		}
 
 		ImGui::Indent(-5.0f);
 	}

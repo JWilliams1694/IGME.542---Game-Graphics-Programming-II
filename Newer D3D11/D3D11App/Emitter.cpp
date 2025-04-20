@@ -4,23 +4,18 @@
 #define RandomRange(min, max) ((float)rand() / RAND_MAX * (max - min) + min)
 
 Emitter::Emitter(int maxParticles,
-				 int particlesPerSec,
-				 float maxLifetime,
-				 float startSize,
-				 float endSize,
-				 DirectX::XMFLOAT4 startColor,
-				 DirectX::XMFLOAT4 endColor,
-				 DirectX::XMFLOAT3 startVelocity,
-				 DirectX::XMFLOAT3 velocityRandomRange,
-				 DirectX::XMFLOAT3 emitterPosition,
-				 DirectX::XMFLOAT3 positionRandomRange,
-				 DirectX::XMFLOAT2 rotationStartMinMax,
-				 DirectX::XMFLOAT2 rotationEndMinMax,
-				 DirectX::XMFLOAT3 emitterAcceleration,
-				 std::shared_ptr<Material> material,
-				 unsigned int spriteSheetWidth,
-				 unsigned int spriteSheetHeight,
-				 float spriteSheetSpeedScale) :
+	int particlesPerSec,
+	float maxLifetime,
+	float startSize,
+	float endSize,
+	DirectX::XMFLOAT4 startColor,
+	DirectX::XMFLOAT4 endColor,
+	DirectX::XMFLOAT3 startVelocity,
+	DirectX::XMFLOAT3 velocityRandomRange,
+	DirectX::XMFLOAT3 emitterPosition,
+	DirectX::XMFLOAT3 positionRandomRange,
+	DirectX::XMFLOAT3 emitterAcceleration,
+	std::shared_ptr<Material> material) :
 	maxParticles(maxParticles),
 	particlesPerSec(particlesPerSec),
 	secondsPerParticle(1.0f / particlesPerSec),
@@ -33,13 +28,6 @@ Emitter::Emitter(int maxParticles,
 	startVelocity(startVelocity),
 	velocityRandomRange(velocityRandomRange),
 	emitterAcceleration(emitterAcceleration),
-	rotationStartMinMax(rotationStartMinMax),
-	rotationEndMinMax(rotationEndMinMax),
-	spriteSheetWidth(max(spriteSheetWidth, 1)),
-	spriteSheetHeight(max(spriteSheetHeight, 1)),
-	spriteSheetFrameWidth(1.0f / spriteSheetWidth),
-	spriteSheetFrameHeight(1.0f / spriteSheetHeight),
-	spriteSheetSpeedScale(spriteSheetSpeedScale),
 	material(material),
 	particles(nullptr)
 {
@@ -92,7 +80,7 @@ void Emitter::Update(float dt, float currentTime)
 				CheckSingleParticle(totalEmitTime, i);
 			}
 		}
-		
+
 	}
 	// Update the particle data
 	while (lastEmit > secondsPerParticle)
@@ -125,13 +113,7 @@ void Emitter::Draw(std::shared_ptr<Camera> camera, float currentTime, bool debug
 	vs->SetFloat("endSize", endSize);
 	vs->SetFloat4("startColor", startColor);
 	vs->SetFloat4("endColor", endColor);
-	vs->SetInt("spriteSheetWidth", spriteSheetWidth);
-	vs->SetInt("spriteSheetHeight", spriteSheetHeight);
-	vs->SetFloat("spriteSheetFrameWidth", spriteSheetFrameWidth);
-	vs->SetFloat("spriteSheetFrameHeight", spriteSheetFrameHeight);
-	vs->SetFloat("spriteSheetSpeedScale", spriteSheetSpeedScale);
 	vs->CopyAllBufferData();
-
 	vs->SetShaderResourceView("ParticleData", particleDataSRV);
 
 	//pixel data
@@ -183,9 +165,14 @@ void Emitter::SetMaxParticles(int maxParticles)
 	CreateParticleBuffer();
 }
 
-bool Emitter::IsSpriteSheet()
+void Emitter::SetShapeType(EmitterShape shape)
 {
-	return spriteSheetHeight > 1 || spriteSheetFrameWidth > 1;
+	shapeType = shape;
+}
+
+EmitterShape Emitter::GetShapeType()
+{
+	return shapeType;
 }
 
 void Emitter::CreateParticleBuffer()
@@ -275,7 +262,7 @@ void Emitter::CopyToGPU()
 	Graphics::Context->Unmap(particleDataBuffer.Get(), 0);
 }
 
-//creates a single particle, random parts taken from chris demo
+//creates a single particle
 void Emitter::EmitParticle(float currentTime)
 {
 	if (livingParticles >= maxParticles)
@@ -284,32 +271,59 @@ void Emitter::EmitParticle(float currentTime)
 	}
 
 	int index = indexFirstDead;
-
 	particles[index].EmitTime = currentTime;
 
-	// Adjust the particle start position based on the random range (box shape)
-	particles[index].StartPos = transform->GetPosition();
-	particles[index].StartPos.x += positionRandomRange.x * RandomRange(-1.0f, 1.0f);
-	particles[index].StartPos.y += positionRandomRange.y * RandomRange(-1.0f, 1.0f);
-	particles[index].StartPos.z += positionRandomRange.z * RandomRange(-1.0f, 1.0f);
+	DirectX::XMFLOAT3 emitterPos = transform->GetPosition();
+	DirectX::XMFLOAT3 spawnPos = emitterPos;
 
-	// Adjust particle start velocity based on random range
+	switch (shapeType)
+	{
+	case EmitterShape::Point:
+		particles[index].StartPos = transform->GetPosition();
+		particles[index].StartPos.x += positionRandomRange.x * RandomRange(-1.0f, 1.0f);
+		particles[index].StartPos.y += positionRandomRange.y * RandomRange(-1.0f, 1.0f);
+		particles[index].StartPos.z += positionRandomRange.z * RandomRange(-1.0f, 1.0f);
+		break;
+
+	case EmitterShape::Box:
+		spawnPos.x += positionRandomRange.x * RandomRange(-1.0f, 1.0f);
+		spawnPos.y += positionRandomRange.y * RandomRange(-1.0f, 1.0f);
+		spawnPos.z += positionRandomRange.z * RandomRange(-1.0f, 1.0f);
+		break;
+
+	case EmitterShape::Sphere:
+	{
+		// Random point in a unit sphere
+		float x, y, z;
+		do {
+			x = RandomRange(-1.0f, 1.0f);
+			y = RandomRange(-1.0f, 1.0f);
+			z = RandomRange(-1.0f, 1.0f);
+		} while (x * x + y * y + z * z > 1.0f);
+
+		spawnPos.x += x * positionRandomRange.x;
+		spawnPos.y += y * positionRandomRange.y;
+		spawnPos.z += z * positionRandomRange.z;
+		break;
+	}
+	}
+	particles[index].StartPos = spawnPos;
+
+
+	// change start position
+	//particles[index].StartPos = transform->GetPosition();
+	//particles[index].StartPos.x += positionRandomRange.x * RandomRange(-1.0f, 1.0f);
+	//particles[index].StartPos.y += positionRandomRange.y * RandomRange(-1.0f, 1.0f);
+	//particles[index].StartPos.z += positionRandomRange.z * RandomRange(-1.0f, 1.0f);
+
+	// change velocity
 	particles[index].StartVelocity = startVelocity;
 	particles[index].StartVelocity.x += velocityRandomRange.x * RandomRange(-1.0f, 1.0f);
 	particles[index].StartVelocity.y += velocityRandomRange.y * RandomRange(-1.0f, 1.0f);
 	particles[index].StartVelocity.z += velocityRandomRange.z * RandomRange(-1.0f, 1.0f);
 
-	// Adjust start and end rotation values based on range
-	particles[index].StartRotation = RandomRange(rotationStartMinMax.x, rotationStartMinMax.y);
-	particles[index].EndRotation = RandomRange(rotationEndMinMax.x, rotationEndMinMax.y);
-
-	// Increment the first dead particle (since it's now alive)
-	indexFirstDead++;
-	indexFirstDead %= maxParticles; // Wrap
-
+	indexFirstDead = (indexFirstDead + 1) % maxParticles;
 	livingParticles++;
-
-
 }
 
 // checks a single particle

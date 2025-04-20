@@ -3,9 +3,7 @@ struct Particle
 	float EmitTime;
 	float3 StartPos;
 	float3 StartVelocity;
-	float StartRotation;
-	float EndRotation;
-	float3 padding;
+	float padding;
 };
 
 cbuffer externalData : register(b0)
@@ -18,12 +16,6 @@ cbuffer externalData : register(b0)
 
 	float currentTime;
 	float3 accel;
-
-	int spriteSheetWidth;
-	int spriteSheetHeight;
-	float spriteSheetFrameWidth;
-	float spriteSheetFrameHeight;
-	float spriteSheetSpeedScale;
 
 	float startSize;
 	float endSize;
@@ -65,16 +57,6 @@ VertexToPixel main(uint id : SV_VertexID)
 	offsets[2] = float2(+1.0f, -1.0f); // BR
 	offsets[3] = float2(-1.0f, -1.0f); // BL
 
-	//rotation stuff
-	float s, c, rotation = lerp(p.StartRotation, p.EndRotation, agePercent);
-	sincos(rotation, s, c);
-	float2x2 rot =
-	{
-		c, s,
-		-s, c
-	};
-	float2 rotatedOffset = mul(offsets[cornerID], rot) * size;
-
 	// Billboarding!
 // Offset the position based on the camera's right and up vectors
 	pos += float3(view._11, view._12, view._13) * offsets[cornerID].x; // RIGHT
@@ -83,24 +65,11 @@ VertexToPixel main(uint id : SV_VertexID)
 	matrix viewProj = mul(projection, view);
 	output.position = mul(viewProj, float4(pos, 1.0f));
 
-
-	//animation stuff from chris demo
-	float animPercent = fmod(agePercent * spriteSheetSpeedScale, 1.0f);
-	uint ssIndex = (uint)floor(animPercent * (spriteSheetWidth * spriteSheetHeight));
-
-	// Get the U/V indices (basically column & row index across the sprite sheet)
-	uint uIndex = ssIndex % spriteSheetWidth;
-	uint vIndex = ssIndex / spriteSheetWidth; // Integer division is important here!
-
-	// Convert to a top-left corner in uv space (0-1)
-	float u = uIndex / (float)spriteSheetWidth;
-	float v = vIndex / (float)spriteSheetHeight;
-
-	float2 uvs[4];
-	uvs[0] = float2(u, v); // TL
-	uvs[1] = float2(u + spriteSheetFrameWidth, v); // TR
-	uvs[2] = float2(u + spriteSheetFrameWidth, v + spriteSheetFrameHeight); // BR
-	uvs[3] = float2(u, v + spriteSheetFrameHeight); // BL
+    float2 uvs[4];
+    uvs[0] = float2(0, 0); // TL
+    uvs[1] = float2(1, 0); // TR
+    uvs[2] = float2(1, 1); // BR
+    uvs[3] = float2(0, 1); // BL
 
 	output.uv = uvs[cornerID];
 	output.colorTint = lerp(startColor, endColor, agePercent);

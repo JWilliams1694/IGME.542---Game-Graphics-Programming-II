@@ -74,6 +74,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11BlendState> particleBlendState;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> particleDebugRasterState;
 	std::vector<std::shared_ptr<Emitter>> emitters;
-	void CreateEmitters(float time);
+	void DrawParticles(float time);
 };
 
