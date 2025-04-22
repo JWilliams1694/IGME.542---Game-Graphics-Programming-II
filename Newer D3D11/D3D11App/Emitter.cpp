@@ -4,18 +4,18 @@
 #define RandomRange(min, max) ((float)rand() / RAND_MAX * (max - min) + min)
 
 Emitter::Emitter(int maxParticles,
-	int particlesPerSec,
-	float maxLifetime,
-	float startSize,
-	float endSize,
-	DirectX::XMFLOAT4 startColor,
-	DirectX::XMFLOAT4 endColor,
-	DirectX::XMFLOAT3 startVelocity,
-	DirectX::XMFLOAT3 velocityRandomRange,
-	DirectX::XMFLOAT3 emitterPosition,
-	DirectX::XMFLOAT3 positionRandomRange,
-	DirectX::XMFLOAT3 emitterAcceleration,
-	std::shared_ptr<Material> material) :
+				 int particlesPerSec,
+				 float maxLifetime,
+				 float startSize,
+				 float endSize,
+				 DirectX::XMFLOAT4 startColor,
+				 DirectX::XMFLOAT4 endColor,
+				 DirectX::XMFLOAT3 startVel,
+				 DirectX::XMFLOAT3 velocityRandRange,
+				 DirectX::XMFLOAT3 emitterPosition,
+				 DirectX::XMFLOAT3 positionRandRange,
+				 DirectX::XMFLOAT3 emitterAccel,
+				 std::shared_ptr<Material> material) :
 	maxParticles(maxParticles),
 	particlesPerSec(particlesPerSec),
 	secondsPerParticle(1.0f / particlesPerSec),
@@ -24,10 +24,10 @@ Emitter::Emitter(int maxParticles,
 	endSize(endSize),
 	startColor(startColor),
 	endColor(endColor),
-	positionRandomRange(positionRandomRange),
-	startVelocity(startVelocity),
-	velocityRandomRange(velocityRandomRange),
-	emitterAcceleration(emitterAcceleration),
+	positionRandRange(positionRandRange),
+	startVel(startVel),
+	velocityRandRange(velocityRandRange),
+	emitterAccel(emitterAccel),
 	material(material),
 	particles(nullptr)
 {
@@ -63,6 +63,7 @@ void Emitter::Update(float dt, float currentTime)
 				CheckSingleParticle(totalEmitTime, i);
 			}
 		}
+
 		//wrapping around case
 		else if (indexFirstDead < indexFirstAlive)
 		{
@@ -75,6 +76,7 @@ void Emitter::Update(float dt, float currentTime)
 				CheckSingleParticle(totalEmitTime, i);
 			}
 		}
+
 		//if all particles are alive
 		else
 		{
@@ -83,8 +85,8 @@ void Emitter::Update(float dt, float currentTime)
 				CheckSingleParticle(totalEmitTime, i);
 			}
 		}
-
 	}
+
 	// emit if enough time has passed
 	while (lastEmit > secondsPerParticle)
 	{
@@ -111,7 +113,7 @@ void Emitter::Draw(std::shared_ptr<Camera> camera, float currentTime)
 	vs->SetMatrix4x4("projection", camera->GetProjection());
 	vs->SetFloat("currentTime", totalEmitTime);
 	vs->SetFloat("lifetime", maxLifetime);
-	vs->SetFloat3("accel", emitterAcceleration);
+	vs->SetFloat3("accel", emitterAccel);
 	vs->SetFloat("startSize", startSize);
 	vs->SetFloat("endSize", endSize);
 	vs->SetFloat4("startColor", startColor);
@@ -267,15 +269,15 @@ void Emitter::EmitParticle(float currentTime)
 
 	//start position
 	particles[index].StartPos = transform->GetPosition();
-	particles[index].StartPos.x += positionRandomRange.x * RandomRange(-1.0f, 1.0f);
-	particles[index].StartPos.y += positionRandomRange.y * RandomRange(-1.0f, 1.0f);
-	particles[index].StartPos.z += positionRandomRange.z * RandomRange(-1.0f, 1.0f);
+	particles[index].StartPos.x += positionRandRange.x * RandomRange(-1.0f, 1.0f);
+	particles[index].StartPos.y += positionRandRange.y * RandomRange(-1.0f, 1.0f);
+	particles[index].StartPos.z += positionRandRange.z * RandomRange(-1.0f, 1.0f);
 
 	// change velocity
-	particles[index].StartVelocity = startVelocity;
-	particles[index].StartVelocity.x += velocityRandomRange.x * RandomRange(-1.0f, 1.0f);
-	particles[index].StartVelocity.y += velocityRandomRange.y * RandomRange(-1.0f, 1.0f);
-	particles[index].StartVelocity.z += velocityRandomRange.z * RandomRange(-1.0f, 1.0f);
+	particles[index].StartVelocity = startVel;
+	particles[index].StartVelocity.x += velocityRandRange.x * RandomRange(-1.0f, 1.0f);
+	particles[index].StartVelocity.y += velocityRandRange.y * RandomRange(-1.0f, 1.0f);
+	particles[index].StartVelocity.z += velocityRandRange.z * RandomRange(-1.0f, 1.0f);
 
 	indexFirstDead = (indexFirstDead + 1) % maxParticles;
 	livingParticles++;

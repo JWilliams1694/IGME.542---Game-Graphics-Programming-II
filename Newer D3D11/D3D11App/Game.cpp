@@ -50,7 +50,7 @@ void Game::Initialize()
 
 	// Set up defaults for lighting options
 	lightOptions = {
-		.LightCount = 3,
+		.LightCount = 13,
 		.GammaCorrection = true,
 		.UseAlbedoTexture = true,
 		.UseMetalMap = true,
@@ -399,7 +399,7 @@ void Game::LoadAssetsAndCreateEntities()
 		XMFLOAT3(0, -3, 0),				//  acceleration
 		magicParticle));
 
-	// Flare
+	// outwards flare
 	emitters.push_back(std::make_shared<Emitter>(
 		400,							// Max particles
 		145,								// Particles per second
@@ -438,11 +438,11 @@ void Game::LoadAssetsAndCreateEntities()
 		4.0f,							// Particle lifetime
 		2.0f,							// Start size
 		10.0f,							// End size
-		XMFLOAT4(0.1f, 0.2f, 0.5f, 0.0f),// Start color
-		XMFLOAT4(0.1f, 0.1f, 0.3f, 3.0f),// End color
+		XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f),// Start color
+		XMFLOAT4(0.1f, 0.1f, 1.0f, 1.0f),// End color
 		XMFLOAT3(0, 0, 0),				// Starting velocity
-		XMFLOAT3(0.1f, 0.1f, 0.1f),		// Velocity randomness range
-		XMFLOAT3(-4, 3, 0),			// Emitter position
+		XMFLOAT3(0.3f, 0.3f, 0.3f),		// Velocity randomness range
+		XMFLOAT3(-6, 3, 0),			// Emitter position
 		XMFLOAT3(0.5f, 0.5f, 0.5f),				// Position randomness range
 		XMFLOAT3(0, 0, 0),				//  acceleration
 		starParticle));

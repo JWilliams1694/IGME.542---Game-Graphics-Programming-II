@@ -25,11 +25,11 @@ public:
 			float endSize,
 			DirectX::XMFLOAT4 startColor,
 			DirectX::XMFLOAT4 endColor,
-			DirectX::XMFLOAT3 startVelocity,
-			DirectX::XMFLOAT3 velocityRandomRange,
-			DirectX::XMFLOAT3 emitterPosition,
-			DirectX::XMFLOAT3 positionRandomRange,
-			DirectX::XMFLOAT3 emitterAcceleration,
+			DirectX::XMFLOAT3 startVel,
+			DirectX::XMFLOAT3 velocityRandRange,
+			DirectX::XMFLOAT3 emitterPos,
+			DirectX::XMFLOAT3 positionRandRange,
+			DirectX::XMFLOAT3 emitterAccel,
 			std::shared_ptr<Material> material);
 	~Emitter();
 
@@ -52,14 +52,14 @@ public:
 	//variables
 	DirectX::XMFLOAT4 startColor;
 	DirectX::XMFLOAT4 endColor;
-	DirectX::XMFLOAT3 startVelocity;
-	DirectX::XMFLOAT3 emitterAcceleration;
+	DirectX::XMFLOAT3 startVel;
+	DirectX::XMFLOAT3 emitterAccel;
 	float startSize;
 	float endSize;
 	float maxLifetime; // The max lifetime of particles
 	//random vars
-	DirectX::XMFLOAT3 positionRandomRange;
-	DirectX::XMFLOAT3 velocityRandomRange;
+	DirectX::XMFLOAT3 positionRandRange;
+	DirectX::XMFLOAT3 velocityRandRange;
 
 private:
 	//particle properties

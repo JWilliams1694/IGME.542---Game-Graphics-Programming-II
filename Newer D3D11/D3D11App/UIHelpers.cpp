@@ -496,12 +496,12 @@ void UIEmitter(std::shared_ptr<Emitter> emitter)
 		XMFLOAT3 pos = emitter->GetTransform()->GetPosition();
 		if (ImGui::DragFloat3("Emitter Position", &pos.x, 0.05f))
 			emitter->GetTransform()->SetPosition(pos);
-		ImGui::DragFloat3("Position Randomness", &emitter->positionRandomRange.x, 0.05f);
+		ImGui::DragFloat3("Position Randomness", &emitter->positionRandRange.x, 0.05f);
 
-		ImGui::DragFloat3("Starting Velocity", &emitter->startVelocity.x, 0.05f);
-		ImGui::DragFloat3("Velocity Randomness", &emitter->velocityRandomRange.x, 0.05f);
+		ImGui::DragFloat3("Starting Velocity", &emitter->startVel.x, 0.05f);
+		ImGui::DragFloat3("Velocity Randomness", &emitter->velocityRandRange.x, 0.05f);
 
-		ImGui::DragFloat3("Acceleration", &emitter->emitterAcceleration.x, 0.05f);
+		ImGui::DragFloat3("Acceleration", &emitter->emitterAccel.x, 0.05f);
 
 		ImGui::Indent(-5.0f);
 	}
