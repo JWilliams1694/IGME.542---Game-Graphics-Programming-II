@@ -55,6 +55,7 @@ void Emitter::Update(float dt, float currentTime)
 	// Check if any particles are dead using circular buffer 
 	if (livingParticles > 0)
 	{
+		//normal case
 		if (indexFirstAlive < indexFirstDead)
 		{
 			for (int i = indexFirstAlive; i < indexFirstDead; i++)
@@ -62,6 +63,7 @@ void Emitter::Update(float dt, float currentTime)
 				CheckSingleParticle(totalEmitTime, i);
 			}
 		}
+		//wrapping around case
 		else if (indexFirstDead < indexFirstAlive)
 		{
 			for (int i = indexFirstAlive; i < maxParticles; i++)
@@ -73,6 +75,7 @@ void Emitter::Update(float dt, float currentTime)
 				CheckSingleParticle(totalEmitTime, i);
 			}
 		}
+		//if all particles are alive
 		else
 		{
 			for (int i = 0; i < maxParticles; i++)
@@ -82,7 +85,7 @@ void Emitter::Update(float dt, float currentTime)
 		}
 
 	}
-	// Update the particle data
+	// emit if enough time has passed
 	while (lastEmit > secondsPerParticle)
 	{
 		EmitParticle(currentTime);

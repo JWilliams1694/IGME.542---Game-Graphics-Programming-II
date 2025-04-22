@@ -437,7 +437,7 @@ void Game::LoadAssetsAndCreateEntities()
 		25,							// Particles per second
 		4.0f,							// Particle lifetime
 		2.0f,							// Start size
-		10,							// End size
+		10.0f,							// End size
 		XMFLOAT4(0.1f, 0.2f, 0.5f, 0.0f),// Start color
 		XMFLOAT4(0.1f, 0.1f, 0.3f, 3.0f),// End color
 		XMFLOAT3(0, 0, 0),				// Starting velocity
