@@ -844,7 +844,7 @@ void Game::DrawParticles(float time)
 	// Draw emitters
 	for (auto& e : emitters)
 	{
-		e->Draw(camera, time, 0);
+		e->Draw(camera, time);
 	}
 
 	// Reset for next frame

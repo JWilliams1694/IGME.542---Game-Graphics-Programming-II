@@ -15,13 +15,6 @@ struct Particle
 	float padding;
 };
 
-enum class EmitterShape
-{
-	Point,
-	Box,
-	Sphere
-};
-
 class Emitter
 {
 public:
@@ -42,7 +35,7 @@ public:
 
 	//methods
 	void Update(float dt, float currentTime);
-	void Draw(std::shared_ptr<Camera> camera, float currentTime, bool debug);
+	void Draw(std::shared_ptr<Camera> camera, float currentTime);
 
 	//getters & setters
 	std::shared_ptr<Transform> GetTransform();
@@ -55,9 +48,6 @@ public:
 
 	int GetMaxParticles();
 	void SetMaxParticles(int maxParticles);
-
-	void SetShapeType(EmitterShape);
-	EmitterShape GetShapeType();
 
 	//variables
 	DirectX::XMFLOAT4 startColor;
@@ -78,8 +68,6 @@ private:
 	int livingParticles; // The amount of currently living particles
 	int indexFirstDead;
 	int indexFirstAlive;
-
-	EmitterShape shapeType = EmitterShape::Point;
 
 	//emission properties
 	int particlesPerSec; // How many particles to emit each second

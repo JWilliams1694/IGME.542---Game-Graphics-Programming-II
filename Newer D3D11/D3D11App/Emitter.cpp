@@ -90,7 +90,7 @@ void Emitter::Update(float dt, float currentTime)
 	}
 }
 
-void Emitter::Draw(std::shared_ptr<Camera> camera, float currentTime, bool debug)
+void Emitter::Draw(std::shared_ptr<Camera> camera, float currentTime)
 {
 	CopyToGPU();
 
@@ -118,7 +118,6 @@ void Emitter::Draw(std::shared_ptr<Camera> camera, float currentTime, bool debug
 
 	//pixel data
 	std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
-	ps->SetInt("debugWireframe", debug);
 	ps->CopyAllBufferData();
 
 
@@ -163,16 +162,6 @@ void Emitter::SetMaxParticles(int maxParticles)
 {
 	this->maxParticles = max(1, maxParticles);
 	CreateParticleBuffer();
-}
-
-void Emitter::SetShapeType(EmitterShape shape)
-{
-	shapeType = shape;
-}
-
-EmitterShape Emitter::GetShapeType()
-{
-	return shapeType;
 }
 
 void Emitter::CreateParticleBuffer()
@@ -273,48 +262,11 @@ void Emitter::EmitParticle(float currentTime)
 	int index = indexFirstDead;
 	particles[index].EmitTime = currentTime;
 
-	DirectX::XMFLOAT3 emitterPos = transform->GetPosition();
-	DirectX::XMFLOAT3 spawnPos = emitterPos;
-
-	switch (shapeType)
-	{
-	case EmitterShape::Point:
-		particles[index].StartPos = transform->GetPosition();
-		particles[index].StartPos.x += positionRandomRange.x * RandomRange(-1.0f, 1.0f);
-		particles[index].StartPos.y += positionRandomRange.y * RandomRange(-1.0f, 1.0f);
-		particles[index].StartPos.z += positionRandomRange.z * RandomRange(-1.0f, 1.0f);
-		break;
-
-	case EmitterShape::Box:
-		spawnPos.x += positionRandomRange.x * RandomRange(-1.0f, 1.0f);
-		spawnPos.y += positionRandomRange.y * RandomRange(-1.0f, 1.0f);
-		spawnPos.z += positionRandomRange.z * RandomRange(-1.0f, 1.0f);
-		break;
-
-	case EmitterShape::Sphere:
-	{
-		// Random point in a unit sphere
-		float x, y, z;
-		do {
-			x = RandomRange(-1.0f, 1.0f);
-			y = RandomRange(-1.0f, 1.0f);
-			z = RandomRange(-1.0f, 1.0f);
-		} while (x * x + y * y + z * z > 1.0f);
-
-		spawnPos.x += x * positionRandomRange.x;
-		spawnPos.y += y * positionRandomRange.y;
-		spawnPos.z += z * positionRandomRange.z;
-		break;
-	}
-	}
-	particles[index].StartPos = spawnPos;
-
-
-	// change start position
-	//particles[index].StartPos = transform->GetPosition();
-	//particles[index].StartPos.x += positionRandomRange.x * RandomRange(-1.0f, 1.0f);
-	//particles[index].StartPos.y += positionRandomRange.y * RandomRange(-1.0f, 1.0f);
-	//particles[index].StartPos.z += positionRandomRange.z * RandomRange(-1.0f, 1.0f);
+	//start position
+	particles[index].StartPos = transform->GetPosition();
+	particles[index].StartPos.x += positionRandomRange.x * RandomRange(-1.0f, 1.0f);
+	particles[index].StartPos.y += positionRandomRange.y * RandomRange(-1.0f, 1.0f);
+	particles[index].StartPos.z += positionRandomRange.z * RandomRange(-1.0f, 1.0f);
 
 	// change velocity
 	particles[index].StartVelocity = startVelocity;

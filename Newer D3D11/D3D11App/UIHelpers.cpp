@@ -502,12 +502,6 @@ void UIEmitter(std::shared_ptr<Emitter> emitter)
 		ImGui::DragFloat3("Velocity Randomness", &emitter->velocityRandomRange.x, 0.05f);
 
 		ImGui::DragFloat3("Acceleration", &emitter->emitterAcceleration.x, 0.05f);
-		const char* shapeNames[] = { "Point", "Box", "Sphere" };
-		int shapeIndex = (int)emitter->GetShapeType();
-		if (ImGui::Combo("Emitter Shape", &shapeIndex, shapeNames, IM_ARRAYSIZE(shapeNames)))
-		{
-			emitter->SetShapeType((EmitterShape)shapeIndex);
-		}
 
 		ImGui::Indent(-5.0f);
 	}
