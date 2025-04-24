@@ -397,7 +397,8 @@ void Game::LoadAssetsAndCreateEntities()
 		XMFLOAT3(5.5f, 1.0f, 0),			// Emitter position
 		XMFLOAT3(0, 0, 0),				// Position randomness range
 		XMFLOAT3(0, -3, 0),				//  acceleration
-		magicParticle));
+		magicParticle,					//material
+		true));							//enabled
 
 	// outwards flare
 	emitters.push_back(std::make_shared<Emitter>(
@@ -413,7 +414,8 @@ void Game::LoadAssetsAndCreateEntities()
 		XMFLOAT3(-5, -4, 0),				// Emitter position
 		XMFLOAT3(0.1f, 0.1f, 0.1f),		// Position randomness range
 		XMFLOAT3(0, 0, 0),				//  acceleration
-		flareParticle));
+		flareParticle,					//material
+		true));							//enabled
 
 	// Flare2
 	emitters.push_back(std::make_shared<Emitter>(
@@ -429,7 +431,8 @@ void Game::LoadAssetsAndCreateEntities()
 		XMFLOAT3(-2, 3, 0),			// Emitter position
 		XMFLOAT3(0.2f, 0.1f, 0.2f),		// Position randomness
 		XMFLOAT3(0, 2, 0),				//  acceleration
-		flareParticle));
+		flareParticle,					//material
+		true));							//enabled
 
 	// star particle
 	emitters.push_back(std::make_shared<Emitter>(
@@ -445,7 +448,8 @@ void Game::LoadAssetsAndCreateEntities()
 		XMFLOAT3(-6, 3, 0),			// Emitter position
 		XMFLOAT3(0.5f, 0.5f, 0.5f),				// Position randomness range
 		XMFLOAT3(0, 0, 0),				//  acceleration
-		starParticle));
+		starParticle,					//material
+		true));							//enabled
 
 
 

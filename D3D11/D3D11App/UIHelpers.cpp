@@ -518,6 +518,7 @@ void UIEmitter(std::shared_ptr<Emitter> emitter)
 		ImGui::SliderFloat("Starting Size", &emitter->startSize, 0.0f, 10.0f);
 		ImGui::SliderFloat("Ending Size", &emitter->endSize, 0.0f, 10.0f);
 
+		ImGui::Checkbox("Enabled", &emitter->enabled);
 		ImGui::Indent(-5.0f);
 	}
 }

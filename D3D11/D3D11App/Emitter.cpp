@@ -15,7 +15,8 @@ Emitter::Emitter(int maxParticles,
 				 DirectX::XMFLOAT3 emitterPosition,
 				 DirectX::XMFLOAT3 positionRandRange,
 				 DirectX::XMFLOAT3 emitterAccel,
-				 std::shared_ptr<Material> material) :
+				 std::shared_ptr<Material> material,
+				 bool enabled) :
 	maxParticles(maxParticles),
 	particlesPerSec(particlesPerSec),
 	secondsPerParticle(1.0f / particlesPerSec),
@@ -29,7 +30,8 @@ Emitter::Emitter(int maxParticles,
 	velocityRandRange(velocityRandRange),
 	emitterAccel(emitterAccel),
 	material(material),
-	particles(nullptr)
+	particles(nullptr),
+	enabled(enabled)
 {
 	transform = std::make_shared<Transform>();
 	transform->SetPosition(emitterPosition);
@@ -38,6 +40,7 @@ Emitter::Emitter(int maxParticles,
 	livingParticles = 0;
 	lastEmit = 0;
 	totalEmitTime = 0;
+	enabled = true;
 
 	CreateParticleBuffer();
 }
@@ -97,6 +100,10 @@ void Emitter::Update(float dt, float currentTime)
 
 void Emitter::Draw(std::shared_ptr<Camera> camera, float currentTime)
 {
+	if(!enabled) 
+	{
+		return;
+	}
 	CopyToGPU();
 
 	UINT stride = 0;

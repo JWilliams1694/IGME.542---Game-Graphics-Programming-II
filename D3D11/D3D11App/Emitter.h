@@ -30,7 +30,8 @@ public:
 			DirectX::XMFLOAT3 emitterPos,
 			DirectX::XMFLOAT3 positionRandRange,
 			DirectX::XMFLOAT3 emitterAccel,
-			std::shared_ptr<Material> material);
+			std::shared_ptr<Material> material,
+			bool enabled);
 	~Emitter();
 
 	//methods
@@ -57,6 +58,7 @@ public:
 	float startSize;
 	float endSize;
 	float maxLifetime; // The max lifetime of particles
+	bool enabled;
 	//random vars
 	DirectX::XMFLOAT3 positionRandRange;
 	DirectX::XMFLOAT3 velocityRandRange;
