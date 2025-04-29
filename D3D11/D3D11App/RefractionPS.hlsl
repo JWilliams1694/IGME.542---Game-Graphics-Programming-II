@@ -1,5 +1,5 @@
 #include "ShaderStructs.hlsli"
-
+#include "Lighting.hlsli"
 cbuffer externalData : register(b0)
 {
     float screenWidth;
@@ -11,7 +11,7 @@ cbuffer externalData : register(b0)
 
 Texture2D NormalMap : register(t0);
 Texture2D ScreenPixels : register(t1);
-TextureCube EnvironmentMap : register(t1);
+TextureCube EnvironmentMap : register(t2);
 SamplerState BasicSampler : register(s0);
 SamplerState ClampSampler : register(s1);
 
@@ -36,7 +36,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 // Distort the screen UV by the offset, scaling as necessary
     float2 refractedUV = screenUV + offsetUV * refractionScale;
     return ScreenPixels.Sample(ClampSampler, refractedUV);
-    
+    float3 sceneColor = pow(ScreenPixels.Sample(ClampSampler, refractedUV).rgb, 2.2f);
     float3 viewToCam = normalize(cameraPosition - input.worldPos);
     float3 viewRefl = normalize(reflect(-viewToCam, input.normal));
     float3 envSample = EnvironmentMap.Sample(BasicSampler, viewRefl).rgb;
@@ -47,6 +47,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 input.normal,
 viewToCam,
 F0_NON_METAL);
+
 // May need to un-gamma correct texture sample, and
 // re-gamma correct result here since this is a linear
 // interpolation (should be done in linear color space)

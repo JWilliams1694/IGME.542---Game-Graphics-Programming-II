@@ -19,7 +19,8 @@ public:
 		std::shared_ptr<SimpleVertexShader> vs,
 		DirectX::XMFLOAT3 tint,
 		DirectX::XMFLOAT2 uvScale = DirectX::XMFLOAT2(1, 1),
-		DirectX::XMFLOAT2 uvOffset = DirectX::XMFLOAT2(0, 0));
+		DirectX::XMFLOAT2 uvOffset = DirectX::XMFLOAT2(0, 0),
+		bool isRefractive=true);
 
 	std::shared_ptr<SimplePixelShader> GetPixelShader();
 	std::shared_ptr<SimpleVertexShader> GetVertexShader();
@@ -29,6 +30,7 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetTextureSRV(std::string name);
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> GetSampler(std::string name);
 	const char* GetName();
+	bool GetRefactive();
 
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>>& GetTextureSRVMap();
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11SamplerState>>& GetSamplerMap();
@@ -38,6 +40,7 @@ public:
 	void SetColorTint(DirectX::XMFLOAT3 tint);
 	void SetUVScale(DirectX::XMFLOAT2 scale);
 	void SetUVOffset(DirectX::XMFLOAT2 offset);
+	void SetRefractive(bool refractive);
 
 	void AddTextureSRV(std::string name, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv);
 	void AddSampler(std::string name, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler);
@@ -64,4 +67,6 @@ private:
 	DirectX::XMFLOAT2 uvScale;
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> textureSRVs;
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11SamplerState>> samplers;
+
+	bool isRefractive;
 };

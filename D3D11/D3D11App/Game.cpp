@@ -744,6 +744,19 @@ void Game::Draw(float deltaTime, float totalTime)
 		std::shared_ptr<SimplePixelShader> ps = lightOptions.UsePBR ? pixelShaderPBR : pixelShader;
 		e->GetMaterial()->SetPixelShader(ps);
 
+		//if refractive, add to special list to set more stuff
+		if (e->GetMaterial()->GetRefactive())
+		{
+			ps->SetShaderResourceView("ScreenPixels", colorSRV);
+			ps->SetShaderResourceView("RefractionSilhouette", silhouetteSRV);
+			ps->SetShaderResourceView("EnvironmentMap", sky->GetSkyTexture());
+
+			ps->SetFloat("screenWidth", (float)Window::Width());
+			ps->SetFloat("screenHeight", (float)Window::Height());
+			ps->SetFloat("refractionScale", demoOptions.RefractionScale);
+			ps->SetInt("useRefractionSilhouette", demoOptions.UseSilhouette);
+		}
+
 		// Set total time on this entity's material's pixel shader
 		// Note: If the shader doesn't have this variable, nothing happens
 		ps->SetFloat3("ambientColor", lightOptions.AmbientColor);
