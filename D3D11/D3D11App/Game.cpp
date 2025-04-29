@@ -111,6 +111,12 @@ void Game::LoadAssetsAndCreateEntities()
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	Graphics::Device->CreateSamplerState(&sampDesc, sampler.GetAddressOf());
 
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> clampSampler;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	Graphics::Device->CreateSamplerState(&sampDesc, clampSampler.GetAddressOf());
+
 	// Load textures
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobbleA, cobbleN, cobbleR, cobbleM;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorA, floorN, floorR, floorM;
@@ -177,6 +183,7 @@ void Game::LoadAssetsAndCreateEntities()
 	std::shared_ptr<SimplePixelShader> skyPS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"SkyPS.cso").c_str());
 	std::shared_ptr<SimpleVertexShader> particleVS = std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"ParticleVS.cso").c_str());
 	std::shared_ptr<SimplePixelShader> particlePS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"ParticlePS.cso").c_str());
+	std::shared_ptr<SimplePixelShader> refractionPS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"RefractionPS.cso").c_str());
 
 	// Load 3D models	
 	std::shared_ptr<Mesh> cubeMesh = std::make_shared<Mesh>("Cube", FixPath(AssetPath + L"Meshes/cube.obj").c_str());
@@ -261,8 +268,13 @@ void Game::LoadAssetsAndCreateEntities()
 	woodMat->AddTextureSRV("RoughnessMap", woodR);
 	woodMat->AddTextureSRV("MetalMap", woodM);
 
+	std::shared_ptr<Material> refractMat = std::make_shared<Material>("Refractive", refractionPS, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2), XMFLOAT2(1, 1), true);
+	refractMat->AddSampler("BasicSampler", sampler);
+	refractMat->AddSampler("ClampSampler", clampSampler);
+	refractMat->AddTextureSRV("NormalMap", floorN);
+
 	// Add materials to list
-	materials.insert(materials.end(), { cobbleMat2x, cobbleMat4x, floorMat, paintMat, scratchedMat, bronzeMat, roughMat, woodMat });
+	materials.insert(materials.end(), { cobbleMat2x, cobbleMat4x, floorMat, paintMat, scratchedMat, bronzeMat, roughMat, woodMat,refractMat });
 
 	// === Create the "randomized" entities, with a static floor ===========
 	std::shared_ptr<GameEntity> floor = std::make_shared<GameEntity>(cubeMesh, cobbleMat4x);
@@ -282,6 +294,7 @@ void Game::LoadAssetsAndCreateEntities()
 		case 4: whichMat = bronzeMat; break;
 		case 5: whichMat = roughMat; break;
 		case 6: whichMat = woodMat; break;
+		case 7: whichMat = refractMat; break;
 		}
 
 		std::shared_ptr<GameEntity> sphere = std::make_shared<GameEntity>(sphereMesh, whichMat);
