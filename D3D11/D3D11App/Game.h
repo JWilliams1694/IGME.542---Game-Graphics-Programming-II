@@ -81,5 +81,7 @@ private:
 	void ResizePostProcess();
 
 	void PostProcess(Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& ppRTV, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& ppSRV);
+
+	std::vector<std::shared_ptr<GameEntity>> refractList;
 };
 

@@ -20,7 +20,7 @@ public:
 		DirectX::XMFLOAT3 tint,
 		DirectX::XMFLOAT2 uvScale = DirectX::XMFLOAT2(1, 1),
 		DirectX::XMFLOAT2 uvOffset = DirectX::XMFLOAT2(0, 0),
-		bool isRefractive=true);
+		bool isRefractive=false);
 
 	std::shared_ptr<SimplePixelShader> GetPixelShader();
 	std::shared_ptr<SimpleVertexShader> GetVertexShader();
