@@ -7,14 +7,12 @@ cbuffer externalData : register(b0)
     int isRefractive;
     float refractionScale;
     float3 cameraPosition;
-    float2 uvScale;
-    float2 uvOffset;
 };
 
 Texture2D NormalMap : register(t0);
-Texture2D ScreenPixels : register(t1);
-TextureCube EnvironmentMap : register(t2);
-Texture2D RefractionSilhouette : register(t3);
+TextureCube EnvironmentMap : register(t1);
+Texture2D ScreenPixels : register(t2);
+Texture2D Silhouette : register(t3);
 SamplerState BasicSampler : register(s0);
 SamplerState ClampSampler : register(s1);
 
@@ -40,7 +38,7 @@ float4 main(VertexToPixel input) : SV_TARGET
     float2 refractedUV = screenUV + offsetUV * refractionScale;
     
     //deal with refractiions in front of the object
-    float silhouette = RefractionSilhouette.Sample(ClampSampler, refractedUV).r;
+    float silhouette = Silhouette.Sample(ClampSampler, refractedUV).r;
     if (silhouette < 1.0f)
     {
         refractedUV = screenUV;

@@ -22,7 +22,8 @@ void BuildUI(
 	std::vector<std::shared_ptr<Material>>& materials,
 	std::vector<std::shared_ptr<Emitter>>& emitters,
 	std::vector<Light>& lights,
-	DemoLightingOptions& lightOptions);
+	DemoLightingOptions& lightOptions,
+	PostProcessOptions& postProcessOptions);
 
 // Helpers for individual scene elements
 void UIMesh(std::shared_ptr<Mesh> mesh);

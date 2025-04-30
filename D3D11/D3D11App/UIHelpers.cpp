@@ -46,7 +46,8 @@ void BuildUI(
 	std::vector<std::shared_ptr<Material>>& materials,
 	std::vector<std::shared_ptr<Emitter>>& emitters,
 	std::vector<Light>& lights,
-	DemoLightingOptions& lightOptions)
+	DemoLightingOptions& lightOptions,
+	PostProcessOptions& postProcessOptions)
 {
 	// A static variable to track whether or not the demo window should be shown.  
 	//  - Static in this context means that the variable is created once 
@@ -274,7 +275,20 @@ void BuildUI(
 			ImGui::Checkbox("Show Skybox", &lightOptions.ShowSkybox);
 			ImGui::TreePop();
 		}
+		// === Refraction ===
+		if (ImGui::TreeNode("Refraction"))
+		{
+			ImGui::SliderFloat("Refraction Scale", &postProcessOptions.RefractionScale, -1.0f, 1.0f);
 
+			ImVec2 size;
+			size.x = ImGui::GetWindowWidth() - 50;
+			size.y = size.x / Window::AspectRatio();
+
+			ImGui::Image(postProcessOptions.ColorSRV.Get(), size);
+			ImGui::Image(postProcessOptions.SilhouetteSRV.Get(), size);
+
+			ImGui::TreePop();
+		}
 		// === Emitters ===
 		if (ImGui::TreeNode("Emitters"))
 		{

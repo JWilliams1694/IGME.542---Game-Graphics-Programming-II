@@ -121,6 +121,13 @@ void Game::LoadAssetsAndCreateEntities()
 	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 	Graphics::Device->CreateSamplerState(&sampDesc, clampSampler.GetAddressOf());
 
+	// Depth state for refraction silhouette
+	D3D11_DEPTH_STENCIL_DESC depthDesc = {};
+	depthDesc.DepthEnable = true;
+	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; // No depth writing
+	depthDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	Graphics::Device->CreateDepthStencilState(&depthDesc, refractionSilhouetteDepthState.GetAddressOf());
+
 	// Load textures
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobbleA, cobbleN, cobbleR, cobbleM;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorA, floorN, floorR, floorM;
@@ -277,7 +284,7 @@ void Game::LoadAssetsAndCreateEntities()
 	std::shared_ptr<Material> refractMat = std::make_shared<Material>("Refractive", refractionPS, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2), XMFLOAT2(1, 1), true);
 	refractMat->AddSampler("BasicSampler", sampler);
 	refractMat->AddSampler("ClampSampler", clampSampler);
-	refractMat->AddTextureSRV("NormalMap", floorN);
+	refractMat->AddTextureSRV("NormalMap", bronzeN);
 
 	// Add materials to list
 	materials.insert(materials.end(), { cobbleMat2x, cobbleMat4x, floorMat, paintMat, scratchedMat, bronzeMat, roughMat, woodMat,refractMat });
@@ -348,25 +355,25 @@ void Game::LoadAssetsAndCreateEntities()
 	//woodSphere->GetTransform()->SetPosition(6, 0, 0);
 
 
-	std::shared_ptr<GameEntity> cobSphere = std::make_shared<GameEntity>(sphereMesh, bronzeMat);
+	std::shared_ptr<GameEntity> cobSphere = std::make_shared<GameEntity>(sphereMesh, cobbleMat2x);
 	cobSphere->GetTransform()->SetPosition(-6, 0, 0);
 
 	std::shared_ptr<GameEntity> floorSphere = std::make_shared<GameEntity>(sphereMesh, refractMat);
 	floorSphere->GetTransform()->SetPosition(-4, 0, 0);
 
-	std::shared_ptr<GameEntity> paintSphere = std::make_shared<GameEntity>(sphereMesh, woodMat);
+	std::shared_ptr<GameEntity> paintSphere = std::make_shared<GameEntity>(sphereMesh, paintMat);
 	paintSphere->GetTransform()->SetPosition(-2, 0, 0);
 
-	std::shared_ptr<GameEntity> scratchSphere = std::make_shared<GameEntity>(sphereMesh, scratchedMat);
+	std::shared_ptr<GameEntity> scratchSphere = std::make_shared<GameEntity>(sphereMesh, refractMat);
 	scratchSphere->GetTransform()->SetPosition(0, 0, 0);
 
-	std::shared_ptr<GameEntity> bronzeSphere = std::make_shared<GameEntity>(sphereMesh, woodMat);
+	std::shared_ptr<GameEntity> bronzeSphere = std::make_shared<GameEntity>(sphereMesh, bronzeMat);
 	bronzeSphere->GetTransform()->SetPosition(2, 0, 0);
 
 	std::shared_ptr<GameEntity> roughSphere = std::make_shared<GameEntity>(sphereMesh, refractMat);
 	roughSphere->GetTransform()->SetPosition(4, 0, 0);
 
-	std::shared_ptr<GameEntity> woodSphere = std::make_shared<GameEntity>(sphereMesh, bronzeMat);
+	std::shared_ptr<GameEntity> woodSphere = std::make_shared<GameEntity>(sphereMesh, woodMat);
 	woodSphere->GetTransform()->SetPosition(6, 0, 0);
 
 	entitiesLineup.push_back(cobSphere);
@@ -656,7 +663,7 @@ void Game::Update(float deltaTime, float totalTime)
 	// this frame's interface.  Note that the building
 	// of the UI could happen at any point during update.
 	UINewFrame(deltaTime);
-	BuildUI(camera, meshes, *currentScene, materials, emitters, lights, lightOptions);
+	BuildUI(camera, meshes, *currentScene, materials, emitters, lights, lightOptions, postProcessOptions);
 
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::KeyDown(VK_ESCAPE))
@@ -751,112 +758,6 @@ void Game::Update(float deltaTime, float totalTime)
 // --------------------------------------------------------
 // Clear the screen, redraw everything, present to the user
 // --------------------------------------------------------
-//void Game::Draw(float deltaTime, float totalTime)
-//{
-//	// Frame START
-//	// - These things should happen ONCE PER FRAME
-//	// - At the beginning of Game::Draw() before drawing *anything*
-//	{
-//		// Clear the back buffer (erase what's on screen) and depth buffer
-//		const float color[4] = { 0, 0, 0, 0 };
-//		Graphics::Context->ClearRenderTargetView(Graphics::BackBufferRTV.Get(), color);
-//		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-//		Graphics::Context->ClearRenderTargetView(colorRTV.Get(), color);
-//	}
-//	Graphics::Context->OMSetRenderTargets(1, colorRTV.GetAddressOf(), Graphics::DepthBufferDSV.Get());
-//
-//	refractList.clear();
-//	// DRAW geometry
-//	// Loop through the game entities and draw each one
-//	// - Note: A constant buffer has already been bound to
-//	//   the vertex shader stage of the pipeline (see Init above)
-//
-//	for (auto& e : *currentScene)
-//	{
-//		// For this demo, the pixel shader may change on any frame, so
-//		// we're just going to swap it here.  This isn't optimal but
-//		// it's a simply implementation for this demo.
-//		std::shared_ptr<SimplePixelShader> ps = lightOptions.UsePBR ? pixelShaderPBR : pixelShader;
-//
-//		//if refractive, add to special list to set more stuff
-//		e->GetMaterial()->SetPixelShader(ps);
-//		if (e->GetMaterial()->GetRefactive())
-//		{
-//			refractList.push_back(e);
-//			continue;
-//		}
-//
-//		// Set total time on this entity's material's pixel shader
-//		// Note: If the shader doesn't have this variable, nothing happens
-//		ps->SetFloat3("ambientColor", lightOptions.AmbientColor);
-//		ps->SetFloat("time", totalTime);
-//		ps->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
-//		ps->SetInt("lightCount", lightOptions.LightCount);
-//		ps->SetInt("gammaCorrection", (int)lightOptions.GammaCorrection);
-//		ps->SetInt("useAlbedoTexture", (int)lightOptions.UseAlbedoTexture);
-//		ps->SetInt("useMetalMap", (int)lightOptions.UseMetalMap);
-//		ps->SetInt("useNormalMap", (int)lightOptions.UseNormalMap);
-//		ps->SetInt("useRoughnessMap", (int)lightOptions.UseRoughnessMap);
-//		ps->SetInt("useBurleyDiffuse", (int)lightOptions.UseBurleyDiffuse);
-//
-//		// Draw one entity
-//		e->Draw(camera);
-//
-//		//deal with back buffer
-//		Microsoft::WRL::ComPtr<ID3D11Texture2D> backBufferResource, colorResource;
-//		colorRTV->GetResource((ID3D11Resource**)colorResource.GetAddressOf());
-//		Graphics::BackBufferRTV->GetResource((ID3D11Resource**)backBufferResource.GetAddressOf());
-//		Graphics::Context->CopyResource(backBufferResource.Get(), colorResource.Get());
-//
-//
-//	}
-//
-//	// Draw the sky after all regular entities
-//	if (lightOptions.ShowSkybox) sky->Draw(camera);
-//
-//	// Draw the light sources
-//	if (lightOptions.DrawLights) DrawLightSources();
-//
-//	//if refractive, add to special list to set more stuff
-//	for (auto& e : refractList)
-//	{
-//		std::shared_ptr<SimplePixelShader> ps = e->GetMaterial()->GetPixelShader();
-//		ps->SetShaderResourceView("ScreenPixels", colorSRV);
-//		ps->SetShaderResourceView("EnvironmentMap", sky->GetSkyTexture());
-//		ps->SetFloat("screenWidth", (float)Window::Width());
-//		ps->SetFloat("screenHeight", (float)Window::Height());
-//		ps->SetFloat("refractionScale", postProcessOptions.RefractionScale);
-//		e->Draw(camera);
-//	}
-//
-//
-//
-//	//DrawParticles(totalTime);
-//
-//	ID3D11ShaderResourceView* null[128] = {};
-//	Graphics::Context->PSSetShaderResources(0, 128, null);
-//	// Frame END
-//	// - These should happen exactly ONCE PER FRAME
-//	// - At the very end of the frame (after drawing *everything*)
-//	{
-//		// Draw the UI after everything else
-//		ImGui::Render();
-//		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-//
-//		// Present at the end of the frame
-//		bool vsync = Graphics::VsyncState();
-//		Graphics::SwapChain->Present(
-//			vsync ? 1 : 0,
-//			vsync ? 0 : DXGI_PRESENT_ALLOW_TEARING);
-//
-//		// Re-bind back buffer and depth buffer after presenting
-//		Graphics::Context->OMSetRenderTargets(
-//			1,
-//			Graphics::BackBufferRTV.GetAddressOf(),
-//			Graphics::DepthBufferDSV.Get());
-//	}
-//}
-//
 void Game::Draw(float deltaTime, float totalTime)
 {
 	// Frame START
@@ -868,6 +769,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::Context->ClearRenderTargetView(Graphics::BackBufferRTV.Get(), color);
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 		Graphics::Context->ClearRenderTargetView(colorRTV.Get(), color);
+		Graphics::Context->ClearRenderTargetView(silhouetteRTV.Get(), color);
 	}
 	Graphics::Context->OMSetRenderTargets(1, colorRTV.GetAddressOf(), Graphics::DepthBufferDSV.Get());
 
@@ -883,6 +785,13 @@ void Game::Draw(float deltaTime, float totalTime)
 		std::shared_ptr<SimplePixelShader> ps = lightOptions.UsePBR ? pixelShaderPBR : pixelShader;
 		e->GetMaterial()->SetPixelShader(ps);
 
+		//if refractive, add to special list to set more stuff
+
+		if (e->GetMaterial()->GetRefactive())
+		{
+			refractList.push_back(e);
+			continue;
+		}
 		// Set total time on this entity's material's pixel shader
 		// Note: If the shader doesn't have this variable, nothing happens
 		ps->SetFloat3("ambientColor", lightOptions.AmbientColor);
@@ -897,14 +806,14 @@ void Game::Draw(float deltaTime, float totalTime)
 		ps->SetInt("useBurleyDiffuse", (int)lightOptions.UseBurleyDiffuse);
 
 		//if refractive, add to special list to set more stuff
-		if (e->GetMaterial()->GetRefactive())
-		{
-			ps->SetShaderResourceView("ScreenPixels", colorSRV);
-			ps->SetShaderResourceView("EnvironmentMap", sky->GetSkyTexture());
-			ps->SetFloat("screenWidth", (float)Window::Width());
-			ps->SetFloat("screenHeight", (float)Window::Height());
-			ps->SetFloat("refractionScale", postProcessOptions.RefractionScale);
-		}
+		//if (e->GetMaterial()->GetRefactive())
+		//{
+		//	ps->SetShaderResourceView("ScreenPixels", colorSRV);
+		//	ps->SetShaderResourceView("EnvironmentMap", sky->GetSkyTexture());
+		//	ps->SetFloat("screenWidth", (float)Window::Width());
+		//	ps->SetFloat("screenHeight", (float)Window::Height());
+		//	ps->SetFloat("refractionScale", postProcessOptions.RefractionScale);
+		//}
 
 		// Draw one entity
 		e->Draw(camera);
@@ -922,7 +831,54 @@ void Game::Draw(float deltaTime, float totalTime)
 	Graphics::BackBufferRTV->GetResource((ID3D11Resource**)backBufferResource.GetAddressOf());
 	Graphics::Context->CopyResource(backBufferResource.Get(), colorResource.Get());
 
-	DrawParticles(totalTime);
+	// Draw refractive objects to silhouette texture
+	{
+		Graphics::Context->OMSetRenderTargets(1, silhouetteRTV.GetAddressOf(), Graphics::DepthBufferDSV.Get());
+
+		// Turn depth writing OFF
+		Graphics::Context->OMSetDepthStencilState(refractionSilhouetteDepthState.Get(), 0);
+
+		// Set up solid pixel shader
+		solidColorPS->SetShader();
+		solidColorPS->SetFloat3("Color", XMFLOAT3(1, 1, 1));
+		solidColorPS->CopyAllBufferData();
+		for (auto& e : refractList)
+		{
+			std::shared_ptr<SimpleVertexShader> vs = e->GetMaterial()->GetVertexShader();
+			vs->SetMatrix4x4("world", e->GetTransform()->GetWorldMatrix());
+			vs->SetMatrix4x4("view", camera->GetView());
+			vs->SetMatrix4x4("projection", camera->GetProjection());
+			vs->CopyAllBufferData();
+
+			e->GetMesh()->SetBuffersAndDraw();
+		}
+
+		Graphics::Context->OMSetDepthStencilState(0, 0);
+	}
+	// Draw just refractive objects
+	{
+		// Back to the screen (AND depth buffer)
+		Graphics::Context->OMSetRenderTargets(1, Graphics::BackBufferRTV.GetAddressOf(), Graphics::DepthBufferDSV.Get());
+
+		for (auto& e : refractList)
+		{
+			std::shared_ptr<SimplePixelShader> ps = e->GetMaterial()->GetPixelShader();
+			ps->SetShaderResourceView("ScreenPixels", colorSRV);
+			ps->SetShaderResourceView("RefractionSilhouette", silhouetteSRV);
+			ps->SetShaderResourceView("EnvironmentMap", sky->GetSkyTexture());
+
+			ps->SetFloat("screenWidth", (float)Window::Width());
+			ps->SetFloat("screenHeight", (float)Window::Height());
+			ps->SetFloat("refractionScale", postProcessOptions.RefractionScale);
+
+			// Basic draw
+			e->Draw(camera);
+		}
+	}
+
+	ID3D11ShaderResourceView* null[128] = {};
+	Graphics::Context->PSSetShaderResources(0, 128, null);
+	//DrawParticles(totalTime);
 	// Frame END
 	// - These should happen exactly ONCE PER FRAME
 	// - At the very end of the frame (after drawing *everything*)
@@ -943,6 +899,8 @@ void Game::Draw(float deltaTime, float totalTime)
 			Graphics::BackBufferRTV.GetAddressOf(),
 			Graphics::DepthBufferDSV.Get());
 	}
+
+
 }
 
 // --------------------------------------------------------
@@ -1027,7 +985,9 @@ void Game::DrawParticles(float time)
 void Game::ResizePostProcess()
 {
 	PostProcess(colorRTV, colorSRV);
+	PostProcess(silhouetteRTV, silhouetteSRV);
 	postProcessOptions.ColorSRV = colorSRV;
+	postProcessOptions.SilhouetteSRV = silhouetteSRV;
 }
 
 void Game::PostProcess(Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& ppRTV, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& ppSRV)
@@ -1049,14 +1009,9 @@ void Game::PostProcess(Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& ppRTV, Mi
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> ppTexture;
 	Graphics::Device->CreateTexture2D(&textureDesc, 0, ppTexture.GetAddressOf());
 
-	// Create the Render Target View
-	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-	rtvDesc.Format = textureDesc.Format;
-	rtvDesc.Texture2D.MipSlice = 0;
-	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	Graphics::Device->CreateRenderTargetView(
 		ppTexture.Get(),
-		&rtvDesc,
+		0,
 		ppRTV.ReleaseAndGetAddressOf());
 	// Create the Shader Resource View
 	// By passing it a null description for the SRV, we

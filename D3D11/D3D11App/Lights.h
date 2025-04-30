@@ -50,5 +50,5 @@ struct PostProcessOptions
 {
 	float RefractionScale;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ColorSRV;
-
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> SilhouetteSRV;
 };
