@@ -74,5 +74,12 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11BlendState> particleBlendState;
 	std::vector<std::shared_ptr<Emitter>> emitters;
 	void DrawParticles(float time);
+
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> colorRTV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> colorSRV;
+	PostProcessOptions postProcessOptions;
+	void ResizePostProcess();
+
+	void PostProcess(Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& ppRTV, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& ppSRV);
 };
 

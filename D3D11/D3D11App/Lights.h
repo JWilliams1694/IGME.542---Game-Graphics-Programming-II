@@ -45,3 +45,10 @@ struct DemoLightingOptions
 	bool UseBurleyDiffuse;
 	DirectX::XMFLOAT3 AmbientColor;
 };
+
+struct PostProcessOptions
+{
+	float RefractionScale;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ColorSRV;
+
+};

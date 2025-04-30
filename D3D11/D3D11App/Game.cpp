@@ -59,9 +59,13 @@ void Game::Initialize()
 		.UsePBR = true,
 		.FreezeLightMovement = false,
 		.DrawLights = true,
-		.ShowSkybox = false,
+		.ShowSkybox = true,
 		.UseBurleyDiffuse = false,
 		.AmbientColor = XMFLOAT3(0,0,0)
+	};
+
+	postProcessOptions = {
+		.RefractionScale = 0.25f
 	};
 
 	// Set initial graphics API state
@@ -184,6 +188,8 @@ void Game::LoadAssetsAndCreateEntities()
 	std::shared_ptr<SimpleVertexShader> particleVS = std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"ParticleVS.cso").c_str());
 	std::shared_ptr<SimplePixelShader> particlePS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"ParticlePS.cso").c_str());
 	std::shared_ptr<SimplePixelShader> refractionPS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"RefractionPS.cso").c_str());
+	std::shared_ptr<SimplePixelShader> texturePS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"SimpleTexture.cso").c_str());
+	std::shared_ptr<SimpleVertexShader> fullscreenTriVS = std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"fullscreenTriVS.cso").c_str());
 
 	// Load 3D models	
 	std::shared_ptr<Mesh> cubeMesh = std::make_shared<Mesh>("Cube", FixPath(AssetPath + L"Meshes/cube.obj").c_str());
@@ -320,31 +326,60 @@ void Game::LoadAssetsAndCreateEntities()
 	starParticle->AddTextureSRV("Particle", star);
 
 	// === Create the line up entities =====================================
-	std::shared_ptr<GameEntity> cobSphere = std::make_shared<GameEntity>(sphereMesh, cobbleMat2x);
+	//std::shared_ptr<GameEntity> cobSphere = std::make_shared<GameEntity>(sphereMesh, cobbleMat2x);
+	//cobSphere->GetTransform()->SetPosition(-6, 0, 0);
+
+	//std::shared_ptr<GameEntity> floorSphere = std::make_shared<GameEntity>(sphereMesh, floorMat);
+	//floorSphere->GetTransform()->SetPosition(-4, 0, 0);
+
+	//std::shared_ptr<GameEntity> paintSphere = std::make_shared<GameEntity>(sphereMesh, paintMat);
+	//paintSphere->GetTransform()->SetPosition(-2, 0, 0);
+
+	////std::shared_ptr<GameEntity> scratchSphere = std::make_shared<GameEntity>(sphereMesh, scratchedMat);
+	////scratchSphere->GetTransform()->SetPosition(0, 0, 0);
+
+	//std::shared_ptr<GameEntity> refractSphere = std::make_shared<GameEntity>(sphereMesh, refractMat);
+	//refractSphere->GetTransform()->SetPosition(0, 0, 0);
+
+	//std::shared_ptr<GameEntity> bronzeSphere = std::make_shared<GameEntity>(sphereMesh, bronzeMat);
+	//bronzeSphere->GetTransform()->SetPosition(2, 0, 0);
+
+	//std::shared_ptr<GameEntity> roughSphere = std::make_shared<GameEntity>(sphereMesh, roughMat);
+	//roughSphere->GetTransform()->SetPosition(4, 0, 0);
+
+	//std::shared_ptr<GameEntity> woodSphere = std::make_shared<GameEntity>(sphereMesh, woodMat);
+	//woodSphere->GetTransform()->SetPosition(6, 0, 0);
+
+
+	std::shared_ptr<GameEntity> cobSphere = std::make_shared<GameEntity>(sphereMesh, woodMat);
 	cobSphere->GetTransform()->SetPosition(-6, 0, 0);
 
-	std::shared_ptr<GameEntity> floorSphere = std::make_shared<GameEntity>(sphereMesh, floorMat);
+	std::shared_ptr<GameEntity> floorSphere = std::make_shared<GameEntity>(sphereMesh, refractMat);
 	floorSphere->GetTransform()->SetPosition(-4, 0, 0);
 
-	std::shared_ptr<GameEntity> paintSphere = std::make_shared<GameEntity>(sphereMesh, paintMat);
+	std::shared_ptr<GameEntity> paintSphere = std::make_shared<GameEntity>(sphereMesh, woodMat);
 	paintSphere->GetTransform()->SetPosition(-2, 0, 0);
 
-	std::shared_ptr<GameEntity> scratchSphere = std::make_shared<GameEntity>(sphereMesh, scratchedMat);
-	scratchSphere->GetTransform()->SetPosition(0, 0, 0);
+	//std::shared_ptr<GameEntity> scratchSphere = std::make_shared<GameEntity>(sphereMesh, scratchedMat);
+	//scratchSphere->GetTransform()->SetPosition(0, 0, 0);
 
-	std::shared_ptr<GameEntity> bronzeSphere = std::make_shared<GameEntity>(sphereMesh, bronzeMat);
+	std::shared_ptr<GameEntity> refractSphere = std::make_shared<GameEntity>(sphereMesh, refractMat);
+	refractSphere->GetTransform()->SetPosition(0, 0, 0);
+
+	std::shared_ptr<GameEntity> bronzeSphere = std::make_shared<GameEntity>(sphereMesh, woodMat);
 	bronzeSphere->GetTransform()->SetPosition(2, 0, 0);
 
-	std::shared_ptr<GameEntity> roughSphere = std::make_shared<GameEntity>(sphereMesh, roughMat);
+	std::shared_ptr<GameEntity> roughSphere = std::make_shared<GameEntity>(sphereMesh, refractMat);
 	roughSphere->GetTransform()->SetPosition(4, 0, 0);
 
-	std::shared_ptr<GameEntity> woodSphere = std::make_shared<GameEntity>(sphereMesh, woodMat);
+	std::shared_ptr<GameEntity> woodSphere = std::make_shared<GameEntity>(sphereMesh, refractMat);
 	woodSphere->GetTransform()->SetPosition(6, 0, 0);
 
 	entitiesLineup.push_back(cobSphere);
 	entitiesLineup.push_back(floorSphere);
 	entitiesLineup.push_back(paintSphere);
-	entitiesLineup.push_back(scratchSphere);
+	//entitiesLineup.push_back(scratchSphere);
+	entitiesLineup.push_back(refractSphere);
 	entitiesLineup.push_back(bronzeSphere);
 	entitiesLineup.push_back(roughSphere);
 	entitiesLineup.push_back(woodSphere);
@@ -484,6 +519,8 @@ void Game::LoadAssetsAndCreateEntities()
 	additiveBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
 	additiveBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	Graphics::Device->CreateBlendState(&additiveBlendDesc, particleBlendState.GetAddressOf());
+
+	ResizePostProcess();
 }
 
 // --------------------------------------------------------
@@ -613,6 +650,7 @@ void Game::OnResize()
 {
 	// Update the camera's projection to match the new aspect ratio
 	if (camera) camera->UpdateProjectionMatrix(Window::AspectRatio());
+	if (Graphics::Device)ResizePostProcess();
 }
 
 
@@ -730,7 +768,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		const float color[4] = { 0, 0, 0, 0 };
 		Graphics::Context->ClearRenderTargetView(Graphics::BackBufferRTV.Get(), color);
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+		Graphics::Context->ClearRenderTargetView(colorRTV.Get(), color);
 	}
+	Graphics::Context->OMSetRenderTargets(1, colorRTV.GetAddressOf(), Graphics::DepthBufferDSV.Get());
 
 	// DRAW geometry
 	// Loop through the game entities and draw each one
@@ -743,19 +783,6 @@ void Game::Draw(float deltaTime, float totalTime)
 		// it's a simply implementation for this demo.
 		std::shared_ptr<SimplePixelShader> ps = lightOptions.UsePBR ? pixelShaderPBR : pixelShader;
 		e->GetMaterial()->SetPixelShader(ps);
-
-		//if refractive, add to special list to set more stuff
-		if (e->GetMaterial()->GetRefactive())
-		{
-			ps->SetShaderResourceView("ScreenPixels", colorSRV);
-			ps->SetShaderResourceView("RefractionSilhouette", silhouetteSRV);
-			ps->SetShaderResourceView("EnvironmentMap", sky->GetSkyTexture());
-
-			ps->SetFloat("screenWidth", (float)Window::Width());
-			ps->SetFloat("screenHeight", (float)Window::Height());
-			ps->SetFloat("refractionScale", demoOptions.RefractionScale);
-			ps->SetInt("useRefractionSilhouette", demoOptions.UseSilhouette);
-		}
 
 		// Set total time on this entity's material's pixel shader
 		// Note: If the shader doesn't have this variable, nothing happens
@@ -770,6 +797,16 @@ void Game::Draw(float deltaTime, float totalTime)
 		ps->SetInt("useRoughnessMap", (int)lightOptions.UseRoughnessMap);
 		ps->SetInt("useBurleyDiffuse", (int)lightOptions.UseBurleyDiffuse);
 
+		//if refractive, add to special list to set more stuff
+		if (e->GetMaterial()->GetRefactive())
+		{
+			ps->SetShaderResourceView("ScreenPixels", colorSRV);
+			ps->SetShaderResourceView("EnvironmentMap", sky->GetSkyTexture());
+			ps->SetFloat("screenWidth", (float)Window::Width());
+			ps->SetFloat("screenHeight", (float)Window::Height());
+			ps->SetFloat("refractionScale", postProcessOptions.RefractionScale);
+		}
+
 		// Draw one entity
 		e->Draw(camera);
 	}
@@ -779,6 +816,12 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// Draw the light sources
 	if (lightOptions.DrawLights) DrawLightSources();
+
+	//copy to back buffer
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> backBufferResource, colorResource;
+	colorRTV->GetResource((ID3D11Resource**)colorResource.GetAddressOf());
+	Graphics::BackBufferRTV->GetResource((ID3D11Resource**)backBufferResource.GetAddressOf());
+	Graphics::Context->CopyResource(backBufferResource.Get(), colorResource.Get());
 
 	DrawParticles(totalTime);
 	// Frame END
@@ -881,4 +924,47 @@ void Game::DrawParticles(float time)
 	Graphics::Context->OMSetBlendState(0, 0, 0xffffffff);
 	Graphics::Context->OMSetDepthStencilState(0, 0);
 	Graphics::Context->RSSetState(0);
+}
+
+void Game::ResizePostProcess()
+{
+	PostProcess(colorRTV, colorSRV);
+	postProcessOptions.ColorSRV = colorSRV;
+}
+
+void Game::PostProcess(Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& ppRTV, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& ppSRV)
+{
+	// Describe the texture we're creating
+	D3D11_TEXTURE2D_DESC textureDesc = {};
+	textureDesc.Width = Window::Width();
+	textureDesc.Height = Window::Height();
+	textureDesc.ArraySize = 1;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	textureDesc.MipLevels = 1;
+	textureDesc.MiscFlags = 0;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	// Create the resource (no need to track it after the views are created below)
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> ppTexture;
+	Graphics::Device->CreateTexture2D(&textureDesc, 0, ppTexture.GetAddressOf());
+
+	// Create the Render Target View
+	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.Format = textureDesc.Format;
+	rtvDesc.Texture2D.MipSlice = 0;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	Graphics::Device->CreateRenderTargetView(
+		ppTexture.Get(),
+		&rtvDesc,
+		ppRTV.ReleaseAndGetAddressOf());
+	// Create the Shader Resource View
+	// By passing it a null description for the SRV, we
+	// get a "default" SRV that has access to the entire resource
+	Graphics::Device->CreateShaderResourceView(
+		ppTexture.Get(),
+		0,
+		ppSRV.ReleaseAndGetAddressOf());
 }
