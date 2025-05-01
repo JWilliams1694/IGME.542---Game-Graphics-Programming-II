@@ -7,6 +7,8 @@ cbuffer externalData : register(b0)
     int isRefractive;
     float refractionScale;
     float3 cameraPosition;
+    float2 uvScale;
+    float2 uvOffset;
 };
 
 Texture2D NormalMap : register(t0);

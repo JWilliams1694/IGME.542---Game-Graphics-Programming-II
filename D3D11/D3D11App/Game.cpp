@@ -786,7 +786,6 @@ void Game::Draw(float deltaTime, float totalTime)
 		e->GetMaterial()->SetPixelShader(ps);
 
 		//if refractive, add to special list to set more stuff
-
 		if (e->GetMaterial()->GetRefactive())
 		{
 			refractList.push_back(e);
@@ -831,54 +830,44 @@ void Game::Draw(float deltaTime, float totalTime)
 	Graphics::BackBufferRTV->GetResource((ID3D11Resource**)backBufferResource.GetAddressOf());
 	Graphics::Context->CopyResource(backBufferResource.Get(), colorResource.Get());
 
-	// Draw refractive objects to silhouette texture
+	//take care of silhouette textures
+	Graphics::Context->OMSetRenderTargets(1, silhouetteRTV.GetAddressOf(), Graphics::DepthBufferDSV.Get());
+	Graphics::Context->OMSetDepthStencilState(refractionSilhouetteDepthState.Get(), 0);
+
+	solidColorPS->SetShader();
+	solidColorPS->SetFloat3("Color", XMFLOAT3(1, 1, 1));
+	solidColorPS->CopyAllBufferData();
+	for (auto& e : refractList)
 	{
-		Graphics::Context->OMSetRenderTargets(1, silhouetteRTV.GetAddressOf(), Graphics::DepthBufferDSV.Get());
+		std::shared_ptr<SimpleVertexShader> vs = e->GetMaterial()->GetVertexShader();
+		vs->SetMatrix4x4("world", e->GetTransform()->GetWorldMatrix());
+		vs->SetMatrix4x4("view", camera->GetView());
+		vs->SetMatrix4x4("projection", camera->GetProjection());
+		vs->CopyAllBufferData();
 
-		// Turn depth writing OFF
-		Graphics::Context->OMSetDepthStencilState(refractionSilhouetteDepthState.Get(), 0);
-
-		// Set up solid pixel shader
-		solidColorPS->SetShader();
-		solidColorPS->SetFloat3("Color", XMFLOAT3(1, 1, 1));
-		solidColorPS->CopyAllBufferData();
-		for (auto& e : refractList)
-		{
-			std::shared_ptr<SimpleVertexShader> vs = e->GetMaterial()->GetVertexShader();
-			vs->SetMatrix4x4("world", e->GetTransform()->GetWorldMatrix());
-			vs->SetMatrix4x4("view", camera->GetView());
-			vs->SetMatrix4x4("projection", camera->GetProjection());
-			vs->CopyAllBufferData();
-
-			e->GetMesh()->SetBuffersAndDraw();
-		}
-
-		Graphics::Context->OMSetDepthStencilState(0, 0);
-	}
-	// Draw just refractive objects
-	{
-		// Back to the screen (AND depth buffer)
-		Graphics::Context->OMSetRenderTargets(1, Graphics::BackBufferRTV.GetAddressOf(), Graphics::DepthBufferDSV.Get());
-
-		for (auto& e : refractList)
-		{
-			std::shared_ptr<SimplePixelShader> ps = e->GetMaterial()->GetPixelShader();
-			ps->SetShaderResourceView("ScreenPixels", colorSRV);
-			ps->SetShaderResourceView("RefractionSilhouette", silhouetteSRV);
-			ps->SetShaderResourceView("EnvironmentMap", sky->GetSkyTexture());
-
-			ps->SetFloat("screenWidth", (float)Window::Width());
-			ps->SetFloat("screenHeight", (float)Window::Height());
-			ps->SetFloat("refractionScale", postProcessOptions.RefractionScale);
-
-			// Basic draw
-			e->Draw(camera);
-		}
+		e->GetMesh()->SetBuffersAndDraw();
 	}
 
+	Graphics::Context->OMSetDepthStencilState(0, 0);
+	Graphics::Context->OMSetRenderTargets(1, Graphics::BackBufferRTV.GetAddressOf(), Graphics::DepthBufferDSV.Get());
+
+	//now is the time for the special stuff for refraction
+	for (auto& e : refractList)
+	{
+		std::shared_ptr<SimplePixelShader> ps = e->GetMaterial()->GetPixelShader();
+		ps->SetShaderResourceView("EnvironmentMap", sky->GetSkyTexture());
+		ps->SetShaderResourceView("ScreenPixels", colorSRV);
+		ps->SetShaderResourceView("Silhouette", silhouetteSRV);
+		ps->SetFloat("screenWidth", (float)Window::Width());
+		ps->SetFloat("screenHeight", (float)Window::Height());
+		ps->SetFloat("refractionScale", postProcessOptions.RefractionScale);
+		e->Draw(camera);
+	}
+
+	//reset stuff
 	ID3D11ShaderResourceView* null[128] = {};
 	Graphics::Context->PSSetShaderResources(0, 128, null);
-	//DrawParticles(totalTime);
+	DrawParticles(totalTime);
 	// Frame END
 	// - These should happen exactly ONCE PER FRAME
 	// - At the very end of the frame (after drawing *everything*)
@@ -899,8 +888,6 @@ void Game::Draw(float deltaTime, float totalTime)
 			Graphics::BackBufferRTV.GetAddressOf(),
 			Graphics::DepthBufferDSV.Get());
 	}
-
-
 }
 
 // --------------------------------------------------------

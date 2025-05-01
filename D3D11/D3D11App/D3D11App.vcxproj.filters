@@ -193,7 +193,7 @@
     <FxCompile Include="FullScreenTri.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Simple.hlsl">
+    <FxCompile Include="Silhouette.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
