@@ -297,7 +297,7 @@ void BuildUI(
 		// === Refraction ===
 		if (ImGui::TreeNode("Refraction"))
 		{
-			ImGui::SliderFloat("Refraction Scale", &postProcessOptions.RefractionScale, -1.0f, 1.0f);
+			ImGui::SliderFloat("Refraction Scale", &postProcessOptions.RefractionScale, -2.0f, 2.0f);
 
 			ImVec2 size;
 			size.x = ImGui::GetWindowWidth() - 50;

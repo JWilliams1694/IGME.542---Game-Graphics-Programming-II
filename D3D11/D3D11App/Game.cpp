@@ -45,7 +45,7 @@ void Game::Initialize()
 
 	//has to be done before LoadAssetsAndCreateEntities or srvs will be nulled
 	postProcessOptions = {
-	.RefractionScale = 0.25f
+	.RefractionScale = 0.5f,
 	};
 
 	// Set up the scene and create lights
@@ -139,6 +139,7 @@ void Game::LoadAssetsAndCreateEntities()
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeA, bronzeN, bronzeR, bronzeM;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughA, roughN, roughR, roughM;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodA, woodN, woodR, woodM;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rockN, grassN, lavaN;
 
 	//load particles
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> flare, magic, scorch, star;
@@ -185,6 +186,10 @@ void Game::LoadAssetsAndCreateEntities()
 	LoadTexture(AssetPath + L"Particles/PNG (Black background)/magic_04.png", magic);
 	LoadTexture(AssetPath + L"Particles/PNG (Black background)/scorch_01.png", scorch);
 	LoadTexture(AssetPath + L"Particles/PNG (Black background)/star_04.png", star);
+
+	LoadTexture(AssetPath + L"Textures/PBR/rock_normals.png", rockN);
+	LoadTexture(AssetPath + L"Textures/PBR/grass_normals.png", grassN);
+	LoadTexture(AssetPath + L"Textures/PBR/lava_normals.png", lavaN);
 #undef LoadTexture
 
 
@@ -198,7 +203,6 @@ void Game::LoadAssetsAndCreateEntities()
 	std::shared_ptr<SimpleVertexShader> particleVS = std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"ParticleVS.cso").c_str());
 	std::shared_ptr<SimplePixelShader> particlePS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"ParticlePS.cso").c_str());
 	std::shared_ptr<SimplePixelShader> refractionPS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"RefractionPS.cso").c_str());
-	//std::shared_ptr<SimplePixelShader> silhouettePS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"Silhouette.cso").c_str());
 	std::shared_ptr<SimpleVertexShader> fullscreenTriVS = std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"FullScreenTri.cso").c_str());
 
 	// Load 3D models	
@@ -216,12 +220,12 @@ void Game::LoadAssetsAndCreateEntities()
 
 	// Create the sky
 	sky = std::make_shared<Sky>(
-		FixPath(AssetPath + L"Skies/Planet/right.png").c_str(),
-		FixPath(AssetPath + L"Skies/Planet/left.png").c_str(),
-		FixPath(AssetPath + L"Skies/Planet/up.png").c_str(),
-		FixPath(AssetPath + L"Skies/Planet/down.png").c_str(),
-		FixPath(AssetPath + L"Skies/Planet/front.png").c_str(),
-		FixPath(AssetPath + L"Skies/Planet/back.png").c_str(),
+		FixPath(AssetPath + L"Skies/Clouds Pink/right.png").c_str(),
+		FixPath(AssetPath + L"Skies/Clouds Pink/left.png").c_str(),
+		FixPath(AssetPath + L"Skies/Clouds Pink/up.png").c_str(),
+		FixPath(AssetPath + L"Skies/Clouds Pink/down.png").c_str(),
+		FixPath(AssetPath + L"Skies/Clouds Pink/front.png").c_str(),
+		FixPath(AssetPath + L"Skies/Clouds Pink/back.png").c_str(),
 		cubeMesh,
 		skyVS,
 		skyPS,
@@ -284,13 +288,23 @@ void Game::LoadAssetsAndCreateEntities()
 	woodMat->AddTextureSRV("RoughnessMap", woodR);
 	woodMat->AddTextureSRV("MetalMap", woodM);
 
-	std::shared_ptr<Material> refractMat = std::make_shared<Material>("Refractive", refractionPS, vertexShader, XMFLOAT3(0,0,0), XMFLOAT2(2, 2), XMFLOAT2(1, 1), true);
-	refractMat->AddSampler("BasicSampler", sampler);
-	refractMat->AddSampler("ClampSampler", clampSampler);
-	refractMat->AddTextureSRV("NormalMap", bronzeN);
+	std::shared_ptr<Material> refractBronzeMat = std::make_shared<Material>("Refractive", refractionPS, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2), XMFLOAT2(1, 1), true);
+	refractBronzeMat->AddSampler("BasicSampler", sampler);
+	refractBronzeMat->AddSampler("ClampSampler", clampSampler);
+	refractBronzeMat->AddTextureSRV("NormalMap", bronzeN);
+
+	std::shared_ptr<Material> refractGrassMat = std::make_shared<Material>("Refractive", refractionPS, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2), XMFLOAT2(1, 1), true);
+	refractGrassMat->AddSampler("BasicSampler", sampler);
+	refractGrassMat->AddSampler("ClampSampler", clampSampler);
+	refractGrassMat->AddTextureSRV("NormalMap", grassN);
+
+	std::shared_ptr<Material> refractLavaMat = std::make_shared<Material>("Refractive", refractionPS, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2), XMFLOAT2(1, 1), true);
+	refractLavaMat->AddSampler("BasicSampler", sampler);
+	refractLavaMat->AddSampler("ClampSampler", clampSampler);
+	refractLavaMat->AddTextureSRV("NormalMap", lavaN);
 
 	// Add materials to list
-	materials.insert(materials.end(), { cobbleMat2x, cobbleMat4x, floorMat, paintMat, scratchedMat, bronzeMat, roughMat, woodMat,refractMat });
+	materials.insert(materials.end(), { cobbleMat2x, cobbleMat4x, floorMat, paintMat, scratchedMat, bronzeMat, roughMat, woodMat,refractBronzeMat,refractGrassMat,refractLavaMat });
 
 	// === Create the "randomized" entities, with a static floor ===========
 	std::shared_ptr<GameEntity> floor = std::make_shared<GameEntity>(cubeMesh, cobbleMat4x);
@@ -310,7 +324,9 @@ void Game::LoadAssetsAndCreateEntities()
 		case 4: whichMat = bronzeMat; break;
 		case 5: whichMat = roughMat; break;
 		case 6: whichMat = woodMat; break;
-		case 7: whichMat = refractMat; break;
+		case 7: whichMat = refractBronzeMat; break;
+		case 8: whichMat = refractGrassMat; break;
+		case 9: whichMat = refractLavaMat; break;
 		}
 
 		std::shared_ptr<GameEntity> sphere = std::make_shared<GameEntity>(sphereMesh, whichMat);
@@ -339,19 +355,19 @@ void Game::LoadAssetsAndCreateEntities()
 	std::shared_ptr<GameEntity> cobSphere = std::make_shared<GameEntity>(sphereMesh, cobbleMat2x);
 	cobSphere->GetTransform()->SetPosition(-6, 0, 0);
 
-	std::shared_ptr<GameEntity> floorSphere = std::make_shared<GameEntity>(sphereMesh, refractMat);
+	std::shared_ptr<GameEntity> floorSphere = std::make_shared<GameEntity>(sphereMesh, refractBronzeMat);
 	floorSphere->GetTransform()->SetPosition(-4, 0, 0);
 
 	std::shared_ptr<GameEntity> paintSphere = std::make_shared<GameEntity>(sphereMesh, paintMat);
 	paintSphere->GetTransform()->SetPosition(-2, 0, 0);
 
-	std::shared_ptr<GameEntity> scratchSphere = std::make_shared<GameEntity>(sphereMesh, refractMat);
+	std::shared_ptr<GameEntity> scratchSphere = std::make_shared<GameEntity>(sphereMesh, refractGrassMat);
 	scratchSphere->GetTransform()->SetPosition(0, 0, 0);
 
 	std::shared_ptr<GameEntity> bronzeSphere = std::make_shared<GameEntity>(sphereMesh, bronzeMat);
 	bronzeSphere->GetTransform()->SetPosition(2, 0, 0);
 
-	std::shared_ptr<GameEntity> roughSphere = std::make_shared<GameEntity>(sphereMesh, refractMat);
+	std::shared_ptr<GameEntity> roughSphere = std::make_shared<GameEntity>(sphereMesh, refractLavaMat);
 	roughSphere->GetTransform()->SetPosition(4, 0, 0);
 
 	std::shared_ptr<GameEntity> woodSphere = std::make_shared<GameEntity>(sphereMesh, woodMat);
@@ -753,7 +769,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::Context->ClearRenderTargetView(silhouetteRTV.Get(), color);
 	}
 	Graphics::Context->OMSetRenderTargets(1, colorRTV.GetAddressOf(), Graphics::DepthBufferDSV.Get());
-	
+
 	//reset list for this run 
 	refractList.clear();
 
@@ -763,18 +779,19 @@ void Game::Draw(float deltaTime, float totalTime)
 	//   the vertex shader stage of the pipeline (see Init above)
 	for (auto& e : *currentScene)
 	{
-		// For this demo, the pixel shader may change on any frame, so
-		// we're just going to swap it here.  This isn't optimal but
-		// it's a simply implementation for this demo.
-		std::shared_ptr<SimplePixelShader> ps = lightOptions.UsePBR ? pixelShaderPBR : pixelShader;
-		e->GetMaterial()->SetPixelShader(ps);
-
 		//if refractive, add to special list to set more stuff
 		if (e->GetMaterial()->GetRefactive())
 		{
 			refractList.push_back(e);
 			continue;
 		}
+		// For this demo, the pixel shader may change on any frame, so
+		// we're just going to swap it here.  This isn't optimal but
+		// it's a simply implementation for this demo.
+		std::shared_ptr<SimplePixelShader> ps = lightOptions.UsePBR ? pixelShaderPBR : pixelShader;
+		e->GetMaterial()->SetPixelShader(ps);
+
+
 		// Set total time on this entity's material's pixel shader
 		// Note: If the shader doesn't have this variable, nothing happens
 		ps->SetFloat3("ambientColor", lightOptions.AmbientColor);

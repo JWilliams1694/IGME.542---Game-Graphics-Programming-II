@@ -55,7 +55,6 @@ float4 main(VertexToPixel input) : SV_TARGET
 	input.normal,
 	viewToCam,
 	F0_NON_METAL);
-		return float4(1, 1, 1, 1);
 		// May need to un-gamma correct texture sample, and
 		// re-gamma correct result here since this is a linear
 		// interpolation (should be done in linear color space)
