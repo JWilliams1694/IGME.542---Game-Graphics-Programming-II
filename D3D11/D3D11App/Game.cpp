@@ -883,8 +883,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 
 	//reset stuff
-	ID3D11ShaderResourceView* null[128] = {};
-	Graphics::Context->PSSetShaderResources(0, 128, null);
+	ID3D11ShaderResourceView* nullSRVs[128] = {};
+	Graphics::Context->PSSetShaderResources(0, 128, nullSRVs);
 	DrawParticles(totalTime);
 	// Frame END
 	// - These should happen exactly ONCE PER FRAME
