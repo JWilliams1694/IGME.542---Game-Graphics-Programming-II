@@ -100,7 +100,7 @@ void Emitter::Update(float dt, float currentTime)
 
 void Emitter::Draw(std::shared_ptr<Camera> camera, float currentTime)
 {
-	if(!enabled) 
+	if (!enabled)
 	{
 		return;
 	}
