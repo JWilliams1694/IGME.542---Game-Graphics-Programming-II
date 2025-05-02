@@ -88,5 +88,8 @@ private:
 	std::vector<std::shared_ptr<GameEntity>> refractList;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> refractionSilhouetteDepthState;
 
+
+	void DrawOneEntity(std::shared_ptr<GameEntity> entity, float totalTime);
+
 };
 

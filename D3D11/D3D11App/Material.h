@@ -40,7 +40,7 @@ public:
 	void SetColorTint(DirectX::XMFLOAT3 tint);
 	void SetUVScale(DirectX::XMFLOAT2 scale);
 	void SetUVOffset(DirectX::XMFLOAT2 offset);
-	void SetRefractive(bool refractive);
+	void SetRefractive(bool isRefractive);
 
 	void AddTextureSRV(std::string name, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv);
 	void AddSampler(std::string name, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler);

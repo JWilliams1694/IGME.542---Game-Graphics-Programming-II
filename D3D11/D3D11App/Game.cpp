@@ -43,6 +43,11 @@ void Game::Initialize()
 	// Seed random
 	srand((unsigned int)time(0));
 
+	//has to be done before LoadAssetsAndCreateEntities or srvs will be nulled
+	postProcessOptions = {
+	.RefractionScale = 0.25f
+	};
+
 	// Set up the scene and create lights
 	LoadAssetsAndCreateEntities();
 	currentScene = &entitiesLineup;
@@ -64,9 +69,7 @@ void Game::Initialize()
 		.AmbientColor = XMFLOAT3(0,0,0)
 	};
 
-	postProcessOptions = {
-		.RefractionScale = 0.25f
-	};
+
 
 	// Set initial graphics API state
 	Graphics::Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -195,8 +198,8 @@ void Game::LoadAssetsAndCreateEntities()
 	std::shared_ptr<SimpleVertexShader> particleVS = std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"ParticleVS.cso").c_str());
 	std::shared_ptr<SimplePixelShader> particlePS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"ParticlePS.cso").c_str());
 	std::shared_ptr<SimplePixelShader> refractionPS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"RefractionPS.cso").c_str());
-	std::shared_ptr<SimplePixelShader> silhouettePS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"Silhouette.cso").c_str());
-	std::shared_ptr<SimpleVertexShader> fullscreenTriVS = std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"fullscreenTriVS.cso").c_str());
+	//std::shared_ptr<SimplePixelShader> silhouettePS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"Silhouette.cso").c_str());
+	//std::shared_ptr<SimpleVertexShader> fullscreenTriVS = std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"FullScreenTri.cso").c_str());
 
 	// Load 3D models	
 	std::shared_ptr<Mesh> cubeMesh = std::make_shared<Mesh>("Cube", FixPath(AssetPath + L"Meshes/cube.obj").c_str());
@@ -281,7 +284,7 @@ void Game::LoadAssetsAndCreateEntities()
 	woodMat->AddTextureSRV("RoughnessMap", woodR);
 	woodMat->AddTextureSRV("MetalMap", woodM);
 
-	std::shared_ptr<Material> refractMat = std::make_shared<Material>("Refractive", refractionPS, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2), XMFLOAT2(1, 1), true);
+	std::shared_ptr<Material> refractMat = std::make_shared<Material>("Refractive", refractionPS, vertexShader, XMFLOAT3(0,0,0), XMFLOAT2(2, 2), XMFLOAT2(1, 1), true);
 	refractMat->AddSampler("BasicSampler", sampler);
 	refractMat->AddSampler("ClampSampler", clampSampler);
 	refractMat->AddTextureSRV("NormalMap", bronzeN);
@@ -520,7 +523,16 @@ void Game::LoadAssetsAndCreateEntities()
 	additiveBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	Graphics::Device->CreateBlendState(&additiveBlendDesc, particleBlendState.GetAddressOf());
 
-	ResizePostProcess();
+	//// Render target setup
+	{
+		// Load shaders
+		//silhouettePS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"Silhouette.cso").c_str());
+		//fullscreenTriVS = std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"FullscreenTriVS.cso").c_str());
+		std::shared_ptr<SimplePixelShader> silhouettePS = std::make_shared<SimplePixelShader>(Graphics::Device, Graphics::Context, FixPath(L"Silhouette.cso").c_str());
+		std::shared_ptr<SimpleVertexShader> fullscreenTriVS = std::make_shared<SimpleVertexShader>(Graphics::Device, Graphics::Context, FixPath(L"FullScreenTri.cso").c_str());
+		ResizePostProcess();
+	}
+	//ResizePostProcess();
 }
 
 // --------------------------------------------------------
@@ -772,6 +784,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		Graphics::Context->ClearRenderTargetView(silhouetteRTV.Get(), color);
 	}
 	Graphics::Context->OMSetRenderTargets(1, colorRTV.GetAddressOf(), Graphics::DepthBufferDSV.Get());
+	
+	//reset list for this run 
+	refractList.clear();
 
 	// DRAW geometry
 	// Loop through the game entities and draw each one
@@ -791,31 +806,23 @@ void Game::Draw(float deltaTime, float totalTime)
 			refractList.push_back(e);
 			continue;
 		}
-		// Set total time on this entity's material's pixel shader
-		// Note: If the shader doesn't have this variable, nothing happens
-		ps->SetFloat3("ambientColor", lightOptions.AmbientColor);
-		ps->SetFloat("time", totalTime);
-		ps->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
-		ps->SetInt("lightCount", lightOptions.LightCount);
-		ps->SetInt("gammaCorrection", (int)lightOptions.GammaCorrection);
-		ps->SetInt("useAlbedoTexture", (int)lightOptions.UseAlbedoTexture);
-		ps->SetInt("useMetalMap", (int)lightOptions.UseMetalMap);
-		ps->SetInt("useNormalMap", (int)lightOptions.UseNormalMap);
-		ps->SetInt("useRoughnessMap", (int)lightOptions.UseRoughnessMap);
-		ps->SetInt("useBurleyDiffuse", (int)lightOptions.UseBurleyDiffuse);
+		//// Set total time on this entity's material's pixel shader
+		//// Note: If the shader doesn't have this variable, nothing happens
+		//ps->SetFloat3("ambientColor", lightOptions.AmbientColor);
+		//ps->SetFloat("time", totalTime);
+		//ps->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
+		//ps->SetInt("lightCount", lightOptions.LightCount);
+		//ps->SetInt("gammaCorrection", (int)lightOptions.GammaCorrection);
+		//ps->SetInt("useAlbedoTexture", (int)lightOptions.UseAlbedoTexture);
+		//ps->SetInt("useMetalMap", (int)lightOptions.UseMetalMap);
+		//ps->SetInt("useNormalMap", (int)lightOptions.UseNormalMap);
+		//ps->SetInt("useRoughnessMap", (int)lightOptions.UseRoughnessMap);
+		//ps->SetInt("useBurleyDiffuse", (int)lightOptions.UseBurleyDiffuse);
 
-		//if refractive, add to special list to set more stuff
-		//if (e->GetMaterial()->GetRefactive())
-		//{
-		//	ps->SetShaderResourceView("ScreenPixels", colorSRV);
-		//	ps->SetShaderResourceView("EnvironmentMap", sky->GetSkyTexture());
-		//	ps->SetFloat("screenWidth", (float)Window::Width());
-		//	ps->SetFloat("screenHeight", (float)Window::Height());
-		//	ps->SetFloat("refractionScale", postProcessOptions.RefractionScale);
-		//}
+		//// Draw one entity
+		//e->Draw(camera);
 
-		// Draw one entity
-		e->Draw(camera);
+		DrawOneEntity(e, totalTime);
 	}
 
 	// Draw the sky after all regular entities
@@ -855,13 +862,24 @@ void Game::Draw(float deltaTime, float totalTime)
 	for (auto& e : refractList)
 	{
 		std::shared_ptr<SimplePixelShader> ps = e->GetMaterial()->GetPixelShader();
-		ps->SetShaderResourceView("EnvironmentMap", sky->GetSkyTexture());
 		ps->SetShaderResourceView("ScreenPixels", colorSRV);
-		ps->SetShaderResourceView("Silhouette", silhouetteSRV);
+		ps->SetShaderResourceView("RefractionSilhouette", silhouetteSRV);
+		ps->SetShaderResourceView("EnvironmentMap", sky->GetSkyTexture());
+
 		ps->SetFloat("screenWidth", (float)Window::Width());
 		ps->SetFloat("screenHeight", (float)Window::Height());
 		ps->SetFloat("refractionScale", postProcessOptions.RefractionScale);
+
+		// Basic draw
 		e->Draw(camera);
+		//std::shared_ptr<SimplePixelShader> ps = e->GetMaterial()->GetPixelShader();
+		//ps->SetShaderResourceView("EnvironmentMap", sky->GetSkyTexture());
+		//ps->SetShaderResourceView("ScreenPixels", colorSRV);
+		//ps->SetShaderResourceView("Silhouette", silhouetteSRV);
+		//ps->SetFloat("screenWidth", (float)Window::Width());
+		//ps->SetFloat("screenHeight", (float)Window::Height());
+		//ps->SetFloat("refractionScale", postProcessOptions.RefractionScale);
+		//e->Draw(camera);
 	}
 
 	//reset stuff
@@ -1007,4 +1025,29 @@ void Game::PostProcess(Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& ppRTV, Mi
 		ppTexture.Get(),
 		0,
 		ppSRV.ReleaseAndGetAddressOf());
+}
+
+void Game::DrawOneEntity(std::shared_ptr<GameEntity> entity, float totalTime)
+{
+	// For this demo, the pixel shader may change on any frame, so
+	// we're just going to swap it here.  This isn't optimal but
+	// it's a simply implementation for this demo.
+	std::shared_ptr<SimplePixelShader> ps = lightOptions.UsePBR ? pixelShaderPBR : pixelShader;
+	entity->GetMaterial()->SetPixelShader(ps);
+
+	// Set total time on this entity's material's pixel shader
+	// Note: If the shader doesn't have this variable, nothing happens
+	ps->SetFloat3("ambientColor", lightOptions.AmbientColor);
+	ps->SetFloat("time", totalTime);
+	ps->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
+	ps->SetInt("lightCount", lightOptions.LightCount);
+	ps->SetInt("gammaCorrection", (int)lightOptions.GammaCorrection);
+	ps->SetInt("useAlbedoTexture", (int)lightOptions.UseAlbedoTexture);
+	ps->SetInt("useMetalMap", (int)lightOptions.UseMetalMap);
+	ps->SetInt("useNormalMap", (int)lightOptions.UseNormalMap);
+	ps->SetInt("useRoughnessMap", (int)lightOptions.UseRoughnessMap);
+	ps->SetInt("useBurleyDiffuse", (int)lightOptions.UseBurleyDiffuse);
+
+	// Draw one entity
+	entity->Draw(camera);
 }

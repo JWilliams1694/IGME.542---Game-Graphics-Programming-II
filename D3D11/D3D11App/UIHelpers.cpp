@@ -275,20 +275,6 @@ void BuildUI(
 			ImGui::Checkbox("Show Skybox", &lightOptions.ShowSkybox);
 			ImGui::TreePop();
 		}
-		// === Refraction ===
-		if (ImGui::TreeNode("Refraction"))
-		{
-			ImGui::SliderFloat("Refraction Scale", &postProcessOptions.RefractionScale, -1.0f, 1.0f);
-
-			ImVec2 size;
-			size.x = ImGui::GetWindowWidth() - 50;
-			size.y = size.x / Window::AspectRatio();
-
-			ImGui::Image(postProcessOptions.ColorSRV.Get(), size);
-			ImGui::Image(postProcessOptions.SilhouetteSRV.Get(), size);
-
-			ImGui::TreePop();
-		}
 		// === Emitters ===
 		if (ImGui::TreeNode("Emitters"))
 		{
@@ -305,6 +291,21 @@ void BuildUI(
 				}
 				ImGui::PopID();
 			}
+			ImGui::TreePop();
+		}
+
+		// === Refraction ===
+		if (ImGui::TreeNode("Refraction"))
+		{
+			ImGui::SliderFloat("Refraction Scale", &postProcessOptions.RefractionScale, -1.0f, 1.0f);
+
+			ImVec2 size;
+			size.x = ImGui::GetWindowWidth() - 50;
+			size.y = size.x / Window::AspectRatio();
+
+			ImGui::Image(postProcessOptions.ColorSRV.Get(), size);
+			ImGui::Image(postProcessOptions.SilhouetteSRV.Get(), size);
+
 			ImGui::TreePop();
 		}
 	}

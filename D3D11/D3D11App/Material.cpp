@@ -74,9 +74,9 @@ void Material::SetColorTint(DirectX::XMFLOAT3 tint) { this->colorTint = tint; }
 void Material::SetUVScale(DirectX::XMFLOAT2 scale) { uvScale = scale; }
 void Material::SetUVOffset(DirectX::XMFLOAT2 offset) { uvOffset = offset; }
 
-void Material::SetRefractive(bool refractive)
+void Material::SetRefractive(bool isRefractive)
 {
-	this->isRefractive = refractive;
+	this->isRefractive = isRefractive;
 }
 
 void Material::AddTextureSRV(std::string name, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv)
